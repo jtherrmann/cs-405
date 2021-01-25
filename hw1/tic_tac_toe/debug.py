@@ -13,6 +13,7 @@ def print_board(board, size, offset):
             board >>= 1
             O_board >>= 1
         print(rowstr)
+    print()
 
 
 def print_win_states(win_states, size):

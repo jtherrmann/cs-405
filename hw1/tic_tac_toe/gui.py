@@ -60,8 +60,11 @@ def click_handler(game):
 def start_timer(game):
 
     def timer():
-        make_move(game)
-        root.after(TIMER_MS, timer)
+        outcome = make_move(game)
+        if outcome is None:
+            root.after(TIMER_MS, timer)
+        else:
+            print(f'Outcome: {outcome}')  # TODO: display in gui
 
     timer()
 
@@ -71,7 +74,8 @@ def make_move(game):
     if move is not None:
         x, y = move_to_point(move)
         draw_move(x, y, char)
-        print(game.get_outcome()) # TODO temp
+        return game.get_outcome()
+    return None
 
 
 # ----------------------------------------------------------------------
@@ -101,7 +105,7 @@ def main(args):
     root.title('Tic-tac-toe')
     canvas.pack()
     draw_grid()
-    game = Game(SIZE, humanX=True, humanO=False, debugOn=args.debug)
+    game = Game(SIZE, humanX=True, humanO=True, debugOn=args.debug)
     root.bind('<Button-1>', click_handler(game))
     start_timer(game)
     root.mainloop()
