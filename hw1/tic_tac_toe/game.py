@@ -24,7 +24,6 @@ class Game:
         self._moveO_func = self._get_move_func(Omover)
         self._board = 0
         self._moveX = True
-        self._outcome = None
         self._human_move = None
 
         if self._debugOn:
@@ -33,18 +32,15 @@ class Game:
     def set_human_move(self, move):
         self._human_move = move
 
-    def get_outcome(self):
-        return self._outcome
-
     def make_move(self):
         move = self._moveX_func() if self._moveX else self._moveO_func()
         board = add_move(move, self._moveX, self._board, self._offset)
 
         if board is None:
-            return None, None
+            return None, None, None
 
         self._board = board
-        self._outcome = check_outcome(self._board, self._offset, self._win_states)
+        outcome = check_outcome(self._board, self._offset, self._win_states)
 
         char = 'X' if self._moveX else 'O'
         self._moveX = not self._moveX
@@ -52,7 +48,7 @@ class Game:
         if self._debugOn:
             debug.print_board(self._board, self._size, self._offset)
 
-        return move, char
+        return move, char, outcome
 
     def _human_move_func(self):
         human_move = self._human_move

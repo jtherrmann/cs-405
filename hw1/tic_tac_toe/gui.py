@@ -85,7 +85,8 @@ def draw_grid():
         canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
 
 
-def draw_move(x, y, char):
+def draw_move(move, char):
+    x, y = move_to_point(move)
     canvas.create_text(x, y, text=char, font='Mono 32', fill=FG)
 
 
@@ -112,11 +113,10 @@ def timer():
 
 
 def make_move():
-    move, char = gamewrapper.game.make_move()
+    move, char, outcome = gamewrapper.game.make_move()
     if move is not None:
-        x, y = move_to_point(move)
-        draw_move(x, y, char)
-    return gamewrapper.game.get_outcome()
+        draw_move(move, char)
+    return outcome
 
 
 # ----------------------------------------------------------------------
