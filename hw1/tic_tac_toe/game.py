@@ -4,13 +4,24 @@ from . import debug
 
 
 class Game:
-    def __init__(self, size, humanX, humanO, debugOn):
+    HUMAN = 'Human'
+    RANDOM = 'Random moves'
+
+    move_funcs = {
+        HUMAN: '_human_move_func',
+        RANDOM: '_engine_move_func'
+    }
+
+    def _get_move_func(self, name):
+        return getattr(self, Game.move_funcs[name])
+
+    def __init__(self, size, Xmover, Omover, debugOn):
         self._debugOn = debugOn
         self._size = size
         self._offset = self._size**2
         self._win_states = get_win_states(self._size)
-        self._moveX_func = self._human_move_func if humanX else self._engine_move_func
-        self._moveO_func = self._human_move_func if humanO else self._engine_move_func
+        self._moveX_func = self._get_move_func(Xmover)
+        self._moveO_func = self._get_move_func(Omover)
         self._board = 0
         self._moveX = True
         self._human_move = None

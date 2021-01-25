@@ -25,16 +25,44 @@ TIMER_MS = 50
 class GameWrapper:
     def __init__(self):
         self.game: Optional[Game] = None
+
+        self._Xmover = tkinter.StringVar(root)
+        self._Omover = tkinter.StringVar(root)
+
+        self._Xmover.set(Game.HUMAN)
+        self._Omover.set(Game.RANDOM)
+
         self._debugOn = False
 
     def set_debug(self, debugOn):
         self._debugOn = debugOn
 
     def new_game(self):
-        self.game = Game(SIZE, humanX=True, humanO=True, debugOn=self._debugOn)
+        self.game = Game(SIZE, Xmover=self._Xmover.get(), Omover=self._Omover.get(), debugOn=self._debugOn)
         canvas.delete('all')
         draw_grid()
         timer()
+
+    def new_game_options(self):
+        window = tkinter.Toplevel()
+        window.geometry('300x150')
+        window.wm_title('Options')
+
+        Xmover_label = tkinter.Label(window, text='X player:')
+        Omover_label = tkinter.Label(window, text='O player:')
+
+        Xmover_menu = tkinter.OptionMenu(window, self._Xmover, *Game.move_funcs.keys())
+        Omover_menu = tkinter.OptionMenu(window, self._Omover,  *Game.move_funcs.keys())
+
+        close_button = tkinter.Button(window, text='Close', command=window.destroy)
+
+        Xmover_label.grid(row=0, column=0)
+        Xmover_menu.grid(row=0, column=1)
+
+        Omover_label.grid(row=1, column=0)
+        Omover_menu.grid(row=1, column=1)
+
+        close_button.grid(row=2, column=0)
 
 
 # ----------------------------------------------------------------------
@@ -117,9 +145,16 @@ def center_coord(row_or_col):
 
 def main(args):
     gamewrapper.set_debug(args.debug)
+
     root.title('Tic-tac-toe')
+    root.resizable(False, False)
     root.bind('<Button-1>', click_handler)
-    button = tkinter.Button(root, text='New game', command=gamewrapper.new_game)
+
+    new_game_button = tkinter.Button(root, text='New game', command=gamewrapper.new_game)
+    options_button = tkinter.Button(root, text='Options', command=gamewrapper.new_game_options)
+
     canvas.pack()
-    button.pack()
+    new_game_button.pack(side=tkinter.LEFT)
+    options_button.pack(side=tkinter.LEFT)
+
     root.mainloop()
