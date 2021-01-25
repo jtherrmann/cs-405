@@ -4,7 +4,7 @@ from random import randint
 class Game:
     def __init__(self, size, humanX, humanO):
         self._size = size
-        self._cell_count = self._size**2
+        self._offset = self._size**2
         self._win_states = get_win_states(self._size)
         self._moveX_func = self._human_move_func if humanX else self._engine_move_func
         self._moveO_func = self._human_move_func if humanO else self._engine_move_func
@@ -17,7 +17,7 @@ class Game:
 
     def make_move(self):
         move = self._moveX_func() if self._moveX else self._moveO_func()
-        game = add_move(move, self._moveX, self._game, self._cell_count)
+        game = add_move(move, self._moveX, self._game, self._offset)
 
         if game is None:
             return None, None
@@ -29,7 +29,7 @@ class Game:
         return move, char
 
     def get_outcome(self):
-        return check_outcome(self._game, self._cell_count, self._win_states)
+        return check_outcome(self._game, self._offset, self._win_states)
 
     def _human_move_func(self):
         human_move = self._human_move
@@ -37,12 +37,10 @@ class Game:
         return human_move
 
     def _engine_move_func(self):
-        return randint(0, self._cell_count - 1)
+        return randint(0, self._offset - 1)
 
 
 def get_win_states(size):
-    # TODO option to view win states in gui
-
     states = []
     for col in range(size):
         state = 1 << col
