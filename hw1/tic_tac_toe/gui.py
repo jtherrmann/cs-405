@@ -201,7 +201,8 @@ def main(args):
 
     root.title('Tic-tac-toe')
     root.resizable(False, False)
-    root.bind('<Button-1>', click_handler)
+
+    canvas.bind('<Button-1>', click_handler)
 
     new_game_button = tkinter.Button(root, text='New game', command=new_game_command)
     history_button = tkinter.Button(root, text='History', command=history_command)
