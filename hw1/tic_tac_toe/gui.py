@@ -70,8 +70,20 @@ def draw_grid():
         canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
 
 
-def draw_move(move, char):
-    x, y = move_to_point(move)
+def draw_board(board, offset):
+    reset_grid()
+    O_board = board >> offset
+    for i in range(offset):
+        if board & 1:
+            draw_piece(i, 'X')
+        if O_board & 1:
+            draw_piece(i, 'O')
+        board >>= 1
+        O_board >>= 1
+
+
+def draw_piece(index, char):
+    x, y = index_to_point(index)
     canvas.create_text(x, y, text=char, font='Mono 32', fill=FG)
 
 
@@ -81,8 +93,8 @@ def draw_move(move, char):
 
 def click_handler(event):
     if gamewrapper.game:
-        move = point_to_move(event.x, event.y)
-        gamewrapper.game.set_human_move(move)
+        index = point_to_index(event.x, event.y)
+        gamewrapper.game.set_human_move(index)
 
 
 def new_game_command():
@@ -148,19 +160,16 @@ def replay_game(name):
 
 def timer():
     if gamewrapper.game is not None:
-        outcome = make_move()
+
+        gamewrapper.game.make_move()
+        draw_board(gamewrapper.game.get_board(), gamewrapper.game.get_offset())
+        outcome = gamewrapper.game.get_outcome()
+
         if outcome is None:
             root.after(TIMER_MS, timer)
         else:
             print(f'Outcome: {outcome}')  # TODO: display in gui
             save_summary()
-
-
-def make_move():
-    move, char, outcome = gamewrapper.game.make_move()
-    if move is not None:
-        draw_move(move, char)
-    return outcome
 
 
 def save_summary():
@@ -177,14 +186,14 @@ def save_summary():
 # Coordinate conversion functions
 # ----------------------------------------------------------------------
 
-def point_to_move(x, y):
+def point_to_index(x, y):
     row = y // CELL_SIZE
     col = x // CELL_SIZE
     return SIZE * row + col
 
 
-def move_to_point(move):
-    row, col = divmod(move, SIZE)
+def index_to_point(index):
+    row, col = divmod(index, SIZE)
     return center_coord(col), center_coord(row)
 
 

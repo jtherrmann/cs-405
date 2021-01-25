@@ -27,18 +27,26 @@ class Game:
         self._Xmover = Xmover
         self._Omover = Omover
 
-        self._board = 0
         self._moveX = True
         self._human_move = None
 
-        self._move_history = []
+        self._boards = [0]
         self._outcome = None
 
         if self._debugOn:
             debug.print_win_states(self._win_states, self._size)
 
-    def set_human_move(self, move):
-        self._human_move = move
+    def set_human_move(self, index):
+        self._human_move = index
+
+    def get_board(self):
+        return self._boards[-1]
+
+    def get_offset(self):
+        return self._offset
+
+    def get_outcome(self):
+        return self._outcome
 
     def get_summary(self):
         assert self._outcome is not None
@@ -46,27 +54,17 @@ class Game:
             'X player': self._Xmover,
             'O player': self._Omover,
             'outcome': self._outcome,
-            'history': self._move_history
+            'history': self._boards
         }
 
     def make_move(self):
-        move = self._moveX_func() if self._moveX else self._moveO_func()
-        board = add_move(move, self._moveX, self._board, self._offset)
+        index = self._moveX_func() if self._moveX else self._moveO_func()
+        board = add_move(index, self._moveX, self.get_board(), self._offset)
 
-        if board is None:
-            return None, None, None
-
-        self._board = board
-        self._move_history.append(move)
-        self._outcome = check_outcome(self._board, self._offset, self._win_states)
-
-        char = 'X' if self._moveX else 'O'
-        self._moveX = not self._moveX
-
-        if self._debugOn:
-            debug.print_board(self._board, self._size, self._offset)
-
-        return move, char, self._outcome
+        if board is not None:
+            self._boards.append(board)
+            self._outcome = check_outcome(self.get_board(), self._offset, self._win_states)
+            self._moveX = not self._moveX
 
     def _human_move_func(self):
         human_move = self._human_move
@@ -96,11 +94,11 @@ def get_win_states(size):
     return states
 
 
-def add_move(move, moveX, board, offset):
-    if move is None:
+def add_move(index, moveX, board, offset):
+    if index is None:
         return None
 
-    bit = 1 << move
+    bit = 1 << index
     offset_bit = bit << offset
     if board & bit != 0 or board & offset_bit != 0:
         return None
