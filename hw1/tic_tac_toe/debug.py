@@ -1,17 +1,17 @@
-def print_game(game, size, offset):
-    Oboard = game >> offset
+def print_board(board, size, offset):
+    O_board = board >> offset
     for _ in range(size):
         rowstr = ''
         for _ in range(size):
-            if game & 1:
-                assert Oboard & 1 == 0
+            if board & 1:
+                assert O_board & 1 == 0
                 rowstr += 'X '
-            elif Oboard & 1:
+            elif O_board & 1:
                 rowstr += 'O '
             else:
                 rowstr += '. '
-            game >>= 1
-            Oboard >>= 1
+            board >>= 1
+            O_board >>= 1
         print(rowstr)
 
 

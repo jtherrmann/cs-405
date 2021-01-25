@@ -8,7 +8,7 @@ class Game:
         self._win_states = get_win_states(self._size)
         self._moveX_func = self._human_move_func if humanX else self._engine_move_func
         self._moveO_func = self._human_move_func if humanO else self._engine_move_func
-        self._game = 0
+        self._board = 0
         self._moveX = True
         self._human_move = None
 
@@ -17,19 +17,19 @@ class Game:
 
     def make_move(self):
         move = self._moveX_func() if self._moveX else self._moveO_func()
-        game = add_move(move, self._moveX, self._game, self._offset)
+        board = add_move(move, self._moveX, self._board, self._offset)
 
-        if game is None:
+        if board is None:
             return None, None
 
-        self._game = game
+        self._board = board
         char = 'X' if self._moveX else 'O'
         self._moveX = not self._moveX
 
         return move, char
 
     def get_outcome(self):
-        return check_outcome(self._game, self._offset, self._win_states)
+        return check_outcome(self._board, self._offset, self._win_states)
 
     def _human_move_func(self):
         human_move = self._human_move
@@ -59,31 +59,31 @@ def get_win_states(size):
     return states
 
 
-def add_move(move, moveX, game, offset):
+def add_move(move, moveX, board, offset):
     if move is None:
         return None
 
     bit = 1 << move
     offset_bit = bit << offset
-    if game & bit != 0 or game & offset_bit != 0:
+    if board & bit != 0 or board & offset_bit != 0:
         return None
 
-    return game | bit if moveX else game | offset_bit
+    return board | bit if moveX else board | offset_bit
 
 
-def check_outcome(game, offset, win_states):
-    Oboard = game >> offset
+def check_outcome(board, offset, win_states):
+    O_board = board >> offset
     for state in win_states:
-        if game & state == state:
+        if board & state == state:
             return 1
-        if Oboard & state == state:
+        if O_board & state == state:
             return -1
-    return 0 if is_full(game, offset) else None
+    return 0 if is_full(board, offset) else None
 
 
-def is_full(game, offset):
+def is_full(board, offset):
     count = 0
-    while game != 0:
-        count += game & 1
-        game >>= 1
+    while board != 0:
+        count += board & 1
+        board >>= 1
     return count == offset
