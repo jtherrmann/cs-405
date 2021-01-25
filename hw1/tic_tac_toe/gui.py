@@ -116,8 +116,7 @@ def make_move():
     if move is not None:
         x, y = move_to_point(move)
         draw_move(x, y, char)
-        return gamewrapper.game.get_outcome()
-    return None
+    return gamewrapper.game.get_outcome()
 
 
 # ----------------------------------------------------------------------
