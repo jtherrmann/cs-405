@@ -9,7 +9,7 @@ class Game:
 
     move_funcs = {
         HUMAN: '_human_move_func',
-        RANDOM: '_engine_move_func'
+        RANDOM: '_random_move_func'
     }
 
     def _get_move_func(self, name):
@@ -56,7 +56,7 @@ class Game:
         self._human_move = None
         return human_move
 
-    def _engine_move_func(self):
+    def _random_move_func(self):
         return randint(0, self._offset - 1)
 
 
