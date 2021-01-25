@@ -1,4 +1,7 @@
+import json
+import os
 import tkinter
+from datetime import datetime, timezone
 from typing import Optional
 
 from .game import Game
@@ -16,6 +19,8 @@ BG = 'black'
 FG = 'white'
 
 TIMER_MS = 50
+
+HISTORY_DIR = 'game-history'
 
 
 # ----------------------------------------------------------------------
@@ -110,6 +115,7 @@ def timer():
         root.after(TIMER_MS, timer)
     else:
         print(f'Outcome: {outcome}')  # TODO: display in gui
+        save_summary()
 
 
 def make_move():
@@ -117,6 +123,16 @@ def make_move():
     if move is not None:
         draw_move(move, char)
     return outcome
+
+
+def save_summary():
+    summary = json.dumps(gamewrapper.game.get_summary())
+
+    if not os.path.isdir(HISTORY_DIR):
+        os.mkdir(HISTORY_DIR)
+
+    with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
+        f.write(summary)
 
 
 # ----------------------------------------------------------------------
