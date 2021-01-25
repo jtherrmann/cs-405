@@ -44,9 +44,12 @@ class GameWrapper:
 
     def new_game(self):
         self.game = Game(SIZE, Xmover=self._Xmover.get(), Omover=self._Omover.get(), debugOn=self._debugOn)
-        canvas.delete('all')
-        draw_grid()
+        reset_grid()
         timer()
+
+    def stop_game(self):
+        self.game = None
+        reset_grid()
 
     def new_game_options(self):
         window = tkinter.Toplevel()
@@ -83,6 +86,11 @@ gamewrapper = GameWrapper()
 # Drawing functions
 # ----------------------------------------------------------------------
 
+def reset_grid():
+    canvas.delete('all')
+    draw_grid()
+
+
 def draw_grid():
     for cell in range(SIZE):
         pos = cell * CELL_SIZE
@@ -96,7 +104,7 @@ def draw_move(move, char):
 
 
 # ----------------------------------------------------------------------
-# Event handlers
+# Widget functions
 # ----------------------------------------------------------------------
 
 def click_handler(event):
@@ -105,17 +113,46 @@ def click_handler(event):
         gamewrapper.game.set_human_move(move)
 
 
+def history_command():
+    def _replay_game():
+        name = selection.get()
+        if name:
+            replay_game(name)
+
+    names = [name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')]
+
+    window = tkinter.Toplevel()
+    window.wm_title('History')
+
+    label = tkinter.Label(window, text='Game:')
+    selection = tkinter.StringVar(window)
+    menu = tkinter.OptionMenu(window, selection, *names)
+    button = tkinter.Button(window, text='Replay', command=_replay_game)
+
+    label.pack()
+    menu.pack()
+    button.pack()
+
+
+def replay_game(name):
+    gamewrapper.stop_game()
+    with open(os.path.join(HISTORY_DIR, name), 'r') as f:
+        summary = json.loads(f.read())
+    print(summary)  # TODO: display in gui
+
+
 # ----------------------------------------------------------------------
 # Timer loop
 # ----------------------------------------------------------------------
 
 def timer():
-    outcome = make_move()
-    if outcome is None:
-        root.after(TIMER_MS, timer)
-    else:
-        print(f'Outcome: {outcome}')  # TODO: display in gui
-        save_summary()
+    if gamewrapper.game is not None:
+        outcome = make_move()
+        if outcome is None:
+            root.after(TIMER_MS, timer)
+        else:
+            print(f'Outcome: {outcome}')  # TODO: display in gui
+            save_summary()
 
 
 def make_move():
@@ -167,9 +204,11 @@ def main(args):
 
     new_game_button = tkinter.Button(root, text='New game', command=gamewrapper.new_game)
     options_button = tkinter.Button(root, text='Options', command=gamewrapper.new_game_options)
+    history_button = tkinter.Button(root, text='History', command=history_command)
 
     canvas.pack()
     new_game_button.pack(side=tkinter.LEFT)
     options_button.pack(side=tkinter.LEFT)
+    history_button.pack(side=tkinter.LEFT)
 
     root.mainloop()
