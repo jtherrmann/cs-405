@@ -30,47 +30,19 @@ HISTORY_DIR = 'game-history'
 class GameWrapper:
     def __init__(self):
         self.game: Optional[Game] = None
-
-        self._Xmover = tkinter.StringVar(root)
-        self._Omover = tkinter.StringVar(root)
-
-        self._Xmover.set(Game.HUMAN)
-        self._Omover.set(Game.RANDOM)
-
         self._debugOn = False
 
     def set_debug(self, debugOn):
         self._debugOn = debugOn
 
-    def new_game(self):
-        self.game = Game(SIZE, Xmover=self._Xmover.get(), Omover=self._Omover.get(), debugOn=self._debugOn)
+    def new_game(self, Xmover, Omover):
+        self.game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
         reset_grid()
         timer()
 
     def stop_game(self):
         self.game = None
         reset_grid()
-
-    def new_game_options(self):
-        window = tkinter.Toplevel()
-        window.geometry('300x150')
-        window.wm_title('Options')
-
-        Xmover_label = tkinter.Label(window, text='X player:')
-        Omover_label = tkinter.Label(window, text='O player:')
-
-        Xmover_menu = tkinter.OptionMenu(window, self._Xmover, *Game.move_funcs.keys())
-        Omover_menu = tkinter.OptionMenu(window, self._Omover,  *Game.move_funcs.keys())
-
-        close_button = tkinter.Button(window, text='Close', command=window.destroy)
-
-        Xmover_label.grid(row=0, column=0)
-        Xmover_menu.grid(row=0, column=1)
-
-        Omover_label.grid(row=1, column=0)
-        Omover_menu.grid(row=1, column=1)
-
-        close_button.grid(row=2, column=0)
 
 
 # ----------------------------------------------------------------------
@@ -111,6 +83,35 @@ def click_handler(event):
     if gamewrapper.game:
         move = point_to_move(event.x, event.y)
         gamewrapper.game.set_human_move(move)
+
+
+def new_game_command():
+    def _new_game():
+        window.destroy()
+        gamewrapper.new_game(Xmover=Xmover.get(), Omover=Omover.get())
+
+    window = tkinter.Toplevel()
+    window.geometry('300x150')
+    window.wm_title('New game')
+
+    Xmover = tkinter.StringVar(window, value=Game.HUMAN)
+    Omover = tkinter.StringVar(window, value=Game.RANDOM)
+
+    Xmover_label = tkinter.Label(window, text='X player:')
+    Omover_label = tkinter.Label(window, text='O player:')
+
+    Xmover_menu = tkinter.OptionMenu(window, Xmover, *Game.move_funcs.keys())
+    Omover_menu = tkinter.OptionMenu(window, Omover,  *Game.move_funcs.keys())
+
+    button = tkinter.Button(window, text='Play', command=_new_game)
+
+    Xmover_label.grid(row=0, column=0)
+    Xmover_menu.grid(row=0, column=1)
+
+    Omover_label.grid(row=1, column=0)
+    Omover_menu.grid(row=1, column=1)
+
+    button.grid(row=2, column=0)
 
 
 def history_command():
@@ -202,13 +203,11 @@ def main(args):
     root.resizable(False, False)
     root.bind('<Button-1>', click_handler)
 
-    new_game_button = tkinter.Button(root, text='New game', command=gamewrapper.new_game)
-    options_button = tkinter.Button(root, text='Options', command=gamewrapper.new_game_options)
+    new_game_button = tkinter.Button(root, text='New game', command=new_game_command)
     history_button = tkinter.Button(root, text='History', command=history_command)
 
     canvas.pack()
     new_game_button.pack(side=tkinter.LEFT)
-    options_button.pack(side=tkinter.LEFT)
     history_button.pack(side=tkinter.LEFT)
 
     root.mainloop()
