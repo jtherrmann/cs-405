@@ -16,9 +16,11 @@ def print_board(board, size, offset):
 
 
 def print_win_states(win_states, size):
+    print('Win states:\n')
     for state in win_states:
         print_win_state(state, size)
         print()
+    print('(End win states)\n')
 
 
 def print_win_state(state, size):

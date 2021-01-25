@@ -97,11 +97,11 @@ def center_coord(row_or_col):
 # Main
 # ----------------------------------------------------------------------
 
-def main():
+def main(args):
     root.title('Tic-tac-toe')
     canvas.pack()
     draw_grid()
-    game = Game(SIZE, True, False)
+    game = Game(SIZE, humanX=True, humanO=False, debugOn=args.debug)
     root.bind('<Button-1>', click_handler(game))
     start_timer(game)
     root.mainloop()

@@ -1,8 +1,11 @@
 from random import randint
 
+from . import debug
+
 
 class Game:
-    def __init__(self, size, humanX, humanO):
+    def __init__(self, size, humanX, humanO, debugOn):
+        self._debugOn = debugOn
         self._size = size
         self._offset = self._size**2
         self._win_states = get_win_states(self._size)
@@ -11,6 +14,9 @@ class Game:
         self._board = 0
         self._moveX = True
         self._human_move = None
+
+        if self._debugOn:
+            debug.print_win_states(self._win_states, self._size)
 
     def set_human_move(self, move):
         self._human_move = move
@@ -25,6 +31,9 @@ class Game:
         self._board = board
         char = 'X' if self._moveX else 'O'
         self._moveX = not self._moveX
+
+        if self._debugOn:
+            debug.print_board(self._board, self._size, self._offset)
 
         return move, char
 
