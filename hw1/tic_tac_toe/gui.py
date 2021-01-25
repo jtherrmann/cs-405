@@ -71,6 +71,7 @@ def make_move(game):
     if move is not None:
         x, y = move_to_point(move)
         draw_move(x, y, char)
+        print(game.get_outcome()) # TODO temp
 
 
 # ----------------------------------------------------------------------
