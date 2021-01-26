@@ -60,7 +60,7 @@ class GameWrapper:
             self._draw_board()
 
             if self._outcome is not None:
-                self.stop_game()
+                self._game = None
                 self._save_summary()
 
     def new_game(self, Xmover, Omover):
@@ -73,8 +73,17 @@ class GameWrapper:
         self._draw_board()
         timer()
 
-    def stop_game(self):
+    def load_old_game(self, name):
+        with open(os.path.join(HISTORY_DIR, name), 'r') as f:
+            summary = json.loads(f.read())
+
         self._game = None
+        self._Xmover = summary['X player']
+        self._Omover = summary['O player']
+        self._outcome = summary['outcome']
+        self._boards = summary['history']
+        self._history_index = len(self._boards) - 1
+        self._draw_board()
 
     def has_game(self):
         return self._game is not None
@@ -178,9 +187,8 @@ def new_game_command():
 
 def history_command():
     def _replay_game():
-        name = selection.get()
-        if name:
-            replay_game(name)
+        window.destroy()
+        gamewrapper.load_old_game(selection.get())
 
     names = sorted((name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')), reverse=True)
 
@@ -198,13 +206,6 @@ def history_command():
         button.pack()
     else:
         tkinter.messagebox.showerror(message='No previous games')
-
-
-def replay_game(name):
-    gamewrapper.stop_game()
-    with open(os.path.join(HISTORY_DIR, name), 'r') as f:
-        summary = json.loads(f.read())
-    print(summary)  # TODO: display in gui
 
 
 # ----------------------------------------------------------------------
