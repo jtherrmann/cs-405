@@ -134,7 +134,7 @@ class Game:
         return self._boards[-1]
 
     def _draw_board(self):
-        draw_board(self._boards[self._history_index], OFFSET)
+        draw_board(self._boards[self._history_index])
         status_line['text'] = self._get_status()
 
     def _get_status(self):
@@ -172,10 +172,10 @@ game = Game()
 # ----------------------------------------------------------------------
 
 
-def draw_board(board, offset):
+def draw_board(board):
     canvas.delete('all')
     draw_grid()
-    draw_pieces(board, offset)
+    draw_pieces(board)
 
 
 def draw_grid():
@@ -185,9 +185,9 @@ def draw_grid():
         canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
 
 
-def draw_pieces(board, offset):
-    O_board = board >> offset
-    for i in range(offset):
+def draw_pieces(board):
+    O_board = board >> OFFSET
+    for i in range(OFFSET):
         if board & 1:
             draw_piece(i, 'X')
         if O_board & 1:
