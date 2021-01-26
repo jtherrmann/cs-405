@@ -3,9 +3,9 @@ import os
 import tkinter
 import tkinter.messagebox
 from datetime import datetime, timezone
-from typing import Optional
+from random import randint
 
-from .game import Game
+from . import game, debug
 
 
 # ----------------------------------------------------------------------
@@ -16,6 +16,8 @@ SIZE = 4
 OFFSET = SIZE * SIZE
 CELL_SIZE = 100
 CANVAS_SIZE = SIZE * CELL_SIZE
+
+WIN_STATES = game.get_win_states(SIZE)
 
 BG = 'black'
 FG = 'white'
@@ -30,25 +32,42 @@ HISTORY_DIR = 'game-history'
 # ----------------------------------------------------------------------
 
 class GameWrapper:
+    HUMAN = 'Human'
+    RANDOM = 'Random moves'
+
+    move_funcs = {
+        HUMAN: '_human_move_func',
+        RANDOM: '_random_move_func'
+    }
+
+    def _get_move_func(self, name):
+        return getattr(self, GameWrapper.move_funcs[name])
+
     def __init__(self):
-        self._game: Optional[Game] = None
+        self._game_active = False
         self._Xmover = None
         self._Omover = None
         self._outcome = None
+        self._moveX = True
+        self._human_move = None
         self._boards = []
         self._history_index = 0
-        self._debugOn = False
 
-    def _set_game_fields(self, game, Xmover, Omover, outcome, boards, history_index):
-        self._game = game
+        self._moveX_func = None
+        self._moveO_func = None
+
+    def _set_game_fields(self, game_active, Xmover, Omover, outcome, moveX, human_move, boards, history_index):
+        self._game_active = game_active
         self._Xmover = Xmover
         self._Omover = Omover
         self._outcome = outcome
+        self._moveX = moveX
+        self._human_move = human_move
         self._boards = boards
         self._history_index = history_index
 
-    def set_debug(self, debugOn):
-        self._debugOn = debugOn
+        self._moveX_func = self._get_move_func(Xmover)
+        self._moveO_func = self._get_move_func(Omover)
 
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
@@ -61,22 +80,28 @@ class GameWrapper:
             self._draw_board()
 
     def make_move(self):
-        if self._game.make_move():
-            self._boards.append(self._game.get_board())
+        index = self._moveX_func() if self._moveX else self._moveO_func()
+        board = game.add_move(index, self._moveX, self._current_board(), OFFSET)
+
+        if board is not None:
+            self._boards.append(board)
+            self._outcome = game.check_outcome(self._current_board(), OFFSET, WIN_STATES)
+            self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
-            self._outcome = self._game.get_outcome()
             self._draw_board()
 
             if self._outcome is not None:
-                self._game = None
+                self._game_active = False
                 self._save_summary()
 
     def new_game(self, Xmover, Omover):
         self._set_game_fields(
-            game=Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn),
+            game_active=True,
             Xmover=Xmover,
             Omover=Omover,
             outcome=None,
+            moveX=True,
+            human_move=None,
             boards=[0],
             history_index=0
         )
@@ -88,22 +113,25 @@ class GameWrapper:
             summary = json.loads(f.read())
 
         self._set_game_fields(
-            game=None,
+            game_active=False,
             Xmover=summary['X player'],
             Omover=summary['O player'],
             outcome=summary['outcome'],
+            moveX=True,
+            human_move=None,
             boards=summary['history'],
             history_index=len(summary['history']) - 1
         )
         self._draw_board()
 
-    def has_game(self):
-        return self._game is not None
+    def active(self):
+        return self._game_active
 
     def handle_click(self, event):
-        if self.has_game():
-            index = point_to_index(event.x, event.y)
-            self._game.set_human_move(index)
+        self._human_move = point_to_index(event.x, event.y)
+
+    def _current_board(self):
+        return self._boards[-1]
 
     def _draw_board(self):
         draw_board(self._boards[self._history_index], OFFSET)
@@ -118,6 +146,15 @@ class GameWrapper:
         )
         with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
             f.write(summary)
+
+    def _human_move_func(self):
+        human_move = self._human_move
+        self._human_move = None
+        return human_move
+
+    @staticmethod
+    def _random_move_func():
+        return randint(0, OFFSET - 1)
 
 
 # ----------------------------------------------------------------------
@@ -177,14 +214,14 @@ def new_game_command():
     window.geometry('300x150')
     window.wm_title('New game')
 
-    Xmover = tkinter.StringVar(window, value=Game.HUMAN)
-    Omover = tkinter.StringVar(window, value=Game.RANDOM)
+    Xmover = tkinter.StringVar(window, value=GameWrapper.HUMAN)
+    Omover = tkinter.StringVar(window, value=GameWrapper.RANDOM)
 
     Xmover_label = tkinter.Label(window, text='X player:')
     Omover_label = tkinter.Label(window, text='O player:')
 
-    Xmover_menu = tkinter.OptionMenu(window, Xmover, *Game.move_funcs.keys())
-    Omover_menu = tkinter.OptionMenu(window, Omover,  *Game.move_funcs.keys())
+    Xmover_menu = tkinter.OptionMenu(window, Xmover, *GameWrapper.move_funcs.keys())
+    Omover_menu = tkinter.OptionMenu(window, Omover,  *GameWrapper.move_funcs.keys())
 
     button = tkinter.Button(window, text='Play', command=_new_game)
 
@@ -225,7 +262,7 @@ def history_command():
 # ----------------------------------------------------------------------
 
 def timer():
-    if gamewrapper.has_game():
+    if gamewrapper.active():
         gamewrapper.make_move()
         root.after(TIMER_MS, timer)
 
@@ -254,7 +291,8 @@ def center_coord(row_or_col):
 # ----------------------------------------------------------------------
 
 def main(args):
-    gamewrapper.set_debug(args.debug)
+    if args.debug:
+        debug.print_win_states(WIN_STATES, SIZE)
 
     if not os.path.isdir(HISTORY_DIR):
         os.mkdir(HISTORY_DIR)
