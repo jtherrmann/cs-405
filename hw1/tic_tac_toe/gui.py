@@ -39,6 +39,14 @@ class GameWrapper:
         self._history_index = 0
         self._debugOn = False
 
+    def _set_game_fields(self, game, Xmover, Omover, outcome, boards, history_index):
+        self._game = game
+        self._Xmover = Xmover
+        self._Omover = Omover
+        self._outcome = outcome
+        self._boards = boards
+        self._history_index = history_index
+
     def set_debug(self, debugOn):
         self._debugOn = debugOn
 
@@ -64,12 +72,14 @@ class GameWrapper:
                 self._save_summary()
 
     def new_game(self, Xmover, Omover):
-        self._boards = [0]
-        self._history_index = 0
-        self._Xmover = Xmover
-        self._Omover = Omover
-        self._outcome = None
-        self._game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
+        self._set_game_fields(
+            game=Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn),
+            Xmover=Xmover,
+            Omover=Omover,
+            outcome=None,
+            boards=[0],
+            history_index=0
+        )
         self._draw_board()
         timer()
 
@@ -77,12 +87,14 @@ class GameWrapper:
         with open(os.path.join(HISTORY_DIR, name), 'r') as f:
             summary = json.loads(f.read())
 
-        self._game = None
-        self._Xmover = summary['X player']
-        self._Omover = summary['O player']
-        self._outcome = summary['outcome']
-        self._boards = summary['history']
-        self._history_index = len(self._boards) - 1
+        self._set_game_fields(
+            game=None,
+            Xmover=summary['X player'],
+            Omover=summary['O player'],
+            outcome=summary['outcome'],
+            boards=summary['history'],
+            history_index=len(summary['history']) - 1
+        )
         self._draw_board()
 
     def has_game(self):
