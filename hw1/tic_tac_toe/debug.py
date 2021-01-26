@@ -1,21 +1,3 @@
-def print_board(board, size, offset):
-    O_board = board >> offset
-    for _ in range(size):
-        rowstr = ''
-        for _ in range(size):
-            if board & 1:
-                assert O_board & 1 == 0
-                rowstr += 'X '
-            elif O_board & 1:
-                rowstr += 'O '
-            else:
-                rowstr += '. '
-            board >>= 1
-            O_board >>= 1
-        print(rowstr)
-    print()
-
-
 def print_win_states(win_states, size):
     print('Win states:\n')
     for state in win_states:
