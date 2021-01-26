@@ -30,7 +30,7 @@ HISTORY_DIR = 'game-history'
 
 class GameWrapper:
     def __init__(self):
-        self.game: Optional[Game] = None
+        self._game: Optional[Game] = None
         self._boards = None
         self._history_index = 0
         self._debugOn = False
@@ -39,10 +39,11 @@ class GameWrapper:
         self._debugOn = debugOn
 
     def make_move(self):
-        if self.game.make_move():
-            self._boards.append(self.game.get_board())
+        if self._game.make_move():
+            self._boards.append(self._game.get_board())
             self._history_index = len(self._boards) - 1
             self._draw_board()
+        return self._game.get_outcome()
 
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
@@ -55,11 +56,11 @@ class GameWrapper:
             self._draw_board()
 
     def get_summary(self):
-        outcome = self.game.get_outcome()
+        outcome = self._game.get_outcome()
         assert outcome is not None
         return {
-            'X player': self.game.get_Xmover(),
-            'O player': self.game.get_Omover(),
+            'X player': self._game.get_Xmover(),
+            'O player': self._game.get_Omover(),
             'outcome': outcome,
             'history': self._boards
         }
@@ -67,12 +68,20 @@ class GameWrapper:
     def new_game(self, Xmover, Omover):
         self._boards = [0]
         self._history_index = 0
-        self.game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
+        self._game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
         self._draw_board()
         timer()
 
     def stop_game(self):
-        self.game = None
+        self._game = None
+
+    def has_game(self):
+        return self._game is not None
+
+    def handle_click(self, event):
+        if self.has_game():
+            index = point_to_index(event.x, event.y)
+            self._game.set_human_move(index)
 
     def _draw_board(self):
         draw_board(self._boards[self._history_index], OFFSET)
@@ -124,12 +133,6 @@ def draw_piece(index, char):
 # ----------------------------------------------------------------------
 # Widget functions
 # ----------------------------------------------------------------------
-
-def click_handler(event):
-    if gamewrapper.game:
-        index = point_to_index(event.x, event.y)
-        gamewrapper.game.set_human_move(index)
-
 
 def new_game_command():
     def _new_game():
@@ -193,16 +196,12 @@ def replay_game(name):
 # ----------------------------------------------------------------------
 
 def timer():
-    if gamewrapper.game is not None:
-
-        gamewrapper.make_move()
-        outcome = gamewrapper.game.get_outcome()
-
+    if gamewrapper.has_game():
+        outcome = gamewrapper.make_move()
         if outcome is not None:
             print(f'Outcome: {outcome}')  # TODO: display in gui
             save_summary()
             gamewrapper.stop_game()
-
         root.after(TIMER_MS, timer)
 
 
@@ -245,7 +244,7 @@ def main(args):
     root.title('Tic-tac-toe')
     root.resizable(False, False)
 
-    canvas.bind('<Button-1>', click_handler)
+    canvas.bind('<Button-1>', gamewrapper.handle_click)
 
     new_game_button = tkinter.Button(root, text='New game', command=new_game_command)
     history_button = tkinter.Button(root, text='History', command=history_command)
