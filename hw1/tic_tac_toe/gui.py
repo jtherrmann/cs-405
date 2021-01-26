@@ -37,12 +37,10 @@ class GameWrapper:
 
     def new_game(self, Xmover, Omover):
         self.game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
-        reset_grid()
         timer()
 
     def stop_game(self):
         self.game = None
-        reset_grid()
 
 
 # ----------------------------------------------------------------------
@@ -58,9 +56,11 @@ gamewrapper = GameWrapper()
 # Drawing functions
 # ----------------------------------------------------------------------
 
-def reset_grid():
+
+def draw_game(board, offset):
     canvas.delete('all')
     draw_grid()
+    draw_board(board, offset)
 
 
 def draw_grid():
@@ -71,7 +71,6 @@ def draw_grid():
 
 
 def draw_board(board, offset):
-    reset_grid()
     O_board = board >> offset
     for i in range(offset):
         if board & 1:
@@ -162,14 +161,15 @@ def timer():
     if gamewrapper.game is not None:
 
         gamewrapper.game.make_move()
-        draw_board(gamewrapper.game.get_board(), gamewrapper.game.get_offset())
+        draw_game(gamewrapper.game.get_board(), gamewrapper.game.get_offset())
         outcome = gamewrapper.game.get_outcome()
 
-        if outcome is None:
-            root.after(TIMER_MS, timer)
-        else:
+        if outcome is not None:
             print(f'Outcome: {outcome}')  # TODO: display in gui
             save_summary()
+            gamewrapper.stop_game()
+
+        root.after(TIMER_MS, timer)
 
 
 def save_summary():
