@@ -171,7 +171,6 @@ game = Game()
 # Drawing functions
 # ----------------------------------------------------------------------
 
-
 def draw_board(board):
     canvas.delete('all')
     draw_grid()
