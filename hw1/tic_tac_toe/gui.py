@@ -1,6 +1,7 @@
 import json
 import os
 import tkinter
+import tkinter.messagebox
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -94,10 +95,6 @@ class GameWrapper:
         summary = json.dumps(
             {'X player': self._Xmover, 'O player': self._Omover, 'outcome': self._outcome, 'history': self._boards}
         )
-
-        if not os.path.isdir(HISTORY_DIR):
-            os.mkdir(HISTORY_DIR)
-
         with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
             f.write(summary)
 
@@ -187,17 +184,20 @@ def history_command():
 
     names = sorted((name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')), reverse=True)
 
-    window = tkinter.Toplevel()
-    window.wm_title('History')
+    if names:
+        window = tkinter.Toplevel()
+        window.wm_title('History')
 
-    label = tkinter.Label(window, text='Game:')
-    selection = tkinter.StringVar(window)
-    menu = tkinter.OptionMenu(window, selection, *names)
-    button = tkinter.Button(window, text='Replay', command=_replay_game)
+        label = tkinter.Label(window, text='Game:')
+        selection = tkinter.StringVar(window, value=names[0])
+        menu = tkinter.OptionMenu(window, selection, *names)
+        button = tkinter.Button(window, text='Replay', command=_replay_game)
 
-    label.pack()
-    menu.pack()
-    button.pack()
+        label.pack()
+        menu.pack()
+        button.pack()
+    else:
+        tkinter.messagebox.showerror(message='No previous games')
 
 
 def replay_game(name):
@@ -242,6 +242,9 @@ def center_coord(row_or_col):
 
 def main(args):
     gamewrapper.set_debug(args.debug)
+
+    if not os.path.isdir(HISTORY_DIR):
+        os.mkdir(HISTORY_DIR)
 
     root.title('Tic-tac-toe')
     root.resizable(False, False)
