@@ -31,19 +31,15 @@ HISTORY_DIR = 'game-history'
 class GameWrapper:
     def __init__(self):
         self._game: Optional[Game] = None
-        self._boards = None
+        self._Xmover = None
+        self._Omover = None
+        self._outcome = None
+        self._boards = []
         self._history_index = 0
         self._debugOn = False
 
     def set_debug(self, debugOn):
         self._debugOn = debugOn
-
-    def make_move(self):
-        if self._game.make_move():
-            self._boards.append(self._game.get_board())
-            self._history_index = len(self._boards) - 1
-            self._draw_board()
-        return self._game.get_outcome()
 
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
@@ -55,19 +51,23 @@ class GameWrapper:
             self._history_index -= 1
             self._draw_board()
 
-    def get_summary(self):
-        outcome = self._game.get_outcome()
-        assert outcome is not None
-        return {
-            'X player': self._game.get_Xmover(),
-            'O player': self._game.get_Omover(),
-            'outcome': outcome,
-            'history': self._boards
-        }
+    def make_move(self):
+        if self._game.make_move():
+            self._boards.append(self._game.get_board())
+            self._history_index = len(self._boards) - 1
+            self._outcome = self._game.get_outcome()
+            self._draw_board()
+
+            if self._outcome is not None:
+                self.stop_game()
+                self._save_summary()
 
     def new_game(self, Xmover, Omover):
         self._boards = [0]
         self._history_index = 0
+        self._Xmover = Xmover
+        self._Omover = Omover
+        self._outcome = None
         self._game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
         self._draw_board()
         timer()
@@ -85,6 +85,21 @@ class GameWrapper:
 
     def _draw_board(self):
         draw_board(self._boards[self._history_index], OFFSET)
+        status_line['text'] = self._get_status()
+
+    def _get_status(self):
+        return f'{self._Xmover} (X) vs. {self._Omover} (O)\nResult: {self._outcome}\nMove: {self._history_index}'
+
+    def _save_summary(self):
+        summary = json.dumps(
+            {'X player': self._Xmover, 'O player': self._Omover, 'outcome': self._outcome, 'history': self._boards}
+        )
+
+        if not os.path.isdir(HISTORY_DIR):
+            os.mkdir(HISTORY_DIR)
+
+        with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
+            f.write(summary)
 
 
 # ----------------------------------------------------------------------
@@ -93,6 +108,7 @@ class GameWrapper:
 
 root = tkinter.Tk()
 canvas = tkinter.Canvas(root, bg=BG, width=CANVAS_SIZE, height=CANVAS_SIZE)
+status_line = tkinter.Label(root)
 gamewrapper = GameWrapper()
 
 
@@ -197,22 +213,8 @@ def replay_game(name):
 
 def timer():
     if gamewrapper.has_game():
-        outcome = gamewrapper.make_move()
-        if outcome is not None:
-            print(f'Outcome: {outcome}')  # TODO: display in gui
-            save_summary()
-            gamewrapper.stop_game()
+        gamewrapper.make_move()
         root.after(TIMER_MS, timer)
-
-
-def save_summary():
-    summary = json.dumps(gamewrapper.get_summary())
-
-    if not os.path.isdir(HISTORY_DIR):
-        os.mkdir(HISTORY_DIR)
-
-    with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
-        f.write(summary)
 
 
 # ----------------------------------------------------------------------
@@ -252,6 +254,7 @@ def main(args):
     history_inc_button = tkinter.Button(root, text='->', command=gamewrapper.inc_history_index)
 
     canvas.pack()
+    status_line.pack()
     new_game_button.pack(side=tkinter.LEFT)
     history_button.pack(side=tkinter.LEFT)
     history_dec_button.pack(side=tkinter.LEFT)

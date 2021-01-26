@@ -24,8 +24,6 @@ class Game:
 
         self._moveX_func = self._get_move_func(Xmover)
         self._moveO_func = self._get_move_func(Omover)
-        self._Xmover = Xmover
-        self._Omover = Omover
 
         self._moveX = True
         self._human_move = None
@@ -44,12 +42,6 @@ class Game:
 
     def get_outcome(self):
         return self._outcome
-
-    def get_Xmover(self):
-        return self._Xmover
-
-    def get_Omover(self):
-        return self._Omover
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
