@@ -5,7 +5,7 @@ import tkinter.messagebox
 from datetime import datetime, timezone
 from random import randint
 
-from . import game, debug
+from . import core, debug
 
 
 # ----------------------------------------------------------------------
@@ -17,7 +17,7 @@ OFFSET = SIZE * SIZE
 CELL_SIZE = 100
 CANVAS_SIZE = SIZE * CELL_SIZE
 
-WIN_STATES = game.get_win_states(SIZE)
+WIN_STATES = core.get_win_states(SIZE)
 
 BG = 'black'
 FG = 'white'
@@ -28,10 +28,10 @@ HISTORY_DIR = 'game-history'
 
 
 # ----------------------------------------------------------------------
-# Game wrapper
+# Game
 # ----------------------------------------------------------------------
 
-class GameWrapper:
+class Game:
     HUMAN = 'Human'
     RANDOM = 'Random moves'
 
@@ -41,7 +41,7 @@ class GameWrapper:
     }
 
     def _get_move_func(self, name):
-        return getattr(self, GameWrapper.move_funcs[name])
+        return getattr(self, Game.move_funcs[name])
 
     def __init__(self):
         self._game_active = False
@@ -81,11 +81,11 @@ class GameWrapper:
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
-        board = game.add_move(index, self._moveX, self._current_board(), OFFSET)
+        board = core.add_move(index, self._moveX, self._current_board(), OFFSET)
 
         if board is not None:
             self._boards.append(board)
-            self._outcome = game.check_outcome(self._current_board(), OFFSET, WIN_STATES)
+            self._outcome = core.check_outcome(self._current_board(), OFFSET, WIN_STATES)
             self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
             self._draw_board()
@@ -164,7 +164,7 @@ class GameWrapper:
 root = tkinter.Tk()
 canvas = tkinter.Canvas(root, bg=BG, width=CANVAS_SIZE, height=CANVAS_SIZE)
 status_line = tkinter.Label(root)
-gamewrapper = GameWrapper()
+game = Game()
 
 
 # ----------------------------------------------------------------------
@@ -208,20 +208,20 @@ def draw_piece(index, char):
 def new_game_command():
     def _new_game():
         window.destroy()
-        gamewrapper.new_game(Xmover=Xmover.get(), Omover=Omover.get())
+        game.new_game(Xmover=Xmover.get(), Omover=Omover.get())
 
     window = tkinter.Toplevel()
     window.geometry('300x150')
     window.wm_title('New game')
 
-    Xmover = tkinter.StringVar(window, value=GameWrapper.HUMAN)
-    Omover = tkinter.StringVar(window, value=GameWrapper.RANDOM)
+    Xmover = tkinter.StringVar(window, value=Game.HUMAN)
+    Omover = tkinter.StringVar(window, value=Game.RANDOM)
 
     Xmover_label = tkinter.Label(window, text='X player:')
     Omover_label = tkinter.Label(window, text='O player:')
 
-    Xmover_menu = tkinter.OptionMenu(window, Xmover, *GameWrapper.move_funcs.keys())
-    Omover_menu = tkinter.OptionMenu(window, Omover,  *GameWrapper.move_funcs.keys())
+    Xmover_menu = tkinter.OptionMenu(window, Xmover, *Game.move_funcs.keys())
+    Omover_menu = tkinter.OptionMenu(window, Omover, *Game.move_funcs.keys())
 
     button = tkinter.Button(window, text='Play', command=_new_game)
 
@@ -237,7 +237,7 @@ def new_game_command():
 def history_command():
     def _replay_game():
         window.destroy()
-        gamewrapper.load_old_game(selection.get())
+        game.load_old_game(selection.get())
 
     names = sorted((name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')), reverse=True)
 
@@ -262,8 +262,8 @@ def history_command():
 # ----------------------------------------------------------------------
 
 def timer():
-    if gamewrapper.active():
-        gamewrapper.make_move()
+    if game.active():
+        game.make_move()
         root.after(TIMER_MS, timer)
 
 
@@ -300,12 +300,12 @@ def main(args):
     root.title('Tic-tac-toe')
     root.resizable(False, False)
 
-    canvas.bind('<Button-1>', gamewrapper.handle_click)
+    canvas.bind('<Button-1>', game.handle_click)
 
     new_game_button = tkinter.Button(root, text='New game', command=new_game_command)
     history_button = tkinter.Button(root, text='History', command=history_command)
-    history_dec_button = tkinter.Button(root, text='<-', command=gamewrapper.dec_history_index)
-    history_inc_button = tkinter.Button(root, text='->', command=gamewrapper.inc_history_index)
+    history_dec_button = tkinter.Button(root, text='<-', command=game.dec_history_index)
+    history_inc_button = tkinter.Button(root, text='->', command=game.inc_history_index)
 
     canvas.pack()
     status_line.pack()
