@@ -19,7 +19,7 @@ class Game:
         self._debugOn = debugOn
 
         self._size = size
-        self._offset = self._size**2
+        self._offset = self._size * self._size
         self._win_states = get_win_states(self._size)
 
         self._moveX_func = self._get_move_func(Xmover)
@@ -30,7 +30,7 @@ class Game:
         self._moveX = True
         self._human_move = None
 
-        self._boards = [0]
+        self._board = 0
         self._outcome = None
 
         if self._debugOn:
@@ -40,31 +40,27 @@ class Game:
         self._human_move = index
 
     def get_board(self):
-        return self._boards[-1]
-
-    def get_offset(self):
-        return self._offset
+        return self._board
 
     def get_outcome(self):
         return self._outcome
 
-    def get_summary(self):
-        assert self._outcome is not None
-        return {
-            'X player': self._Xmover,
-            'O player': self._Omover,
-            'outcome': self._outcome,
-            'history': self._boards
-        }
+    def get_Xmover(self):
+        return self._Xmover
+
+    def get_Omover(self):
+        return self._Omover
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
-        board = add_move(index, self._moveX, self.get_board(), self._offset)
+        board = add_move(index, self._moveX, self._board, self._offset)
 
         if board is not None:
-            self._boards.append(board)
-            self._outcome = check_outcome(self.get_board(), self._offset, self._win_states)
+            self._board = board
+            self._outcome = check_outcome(self._board, self._offset, self._win_states)
             self._moveX = not self._moveX
+            return True
+        return False
 
     def _human_move_func(self):
         human_move = self._human_move

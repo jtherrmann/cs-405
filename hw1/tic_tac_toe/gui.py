@@ -12,6 +12,7 @@ from .game import Game
 # ----------------------------------------------------------------------
 
 SIZE = 4
+OFFSET = SIZE * SIZE
 CELL_SIZE = 100
 CANVAS_SIZE = SIZE * CELL_SIZE
 
@@ -30,17 +31,51 @@ HISTORY_DIR = 'game-history'
 class GameWrapper:
     def __init__(self):
         self.game: Optional[Game] = None
+        self._boards = None
+        self._history_index = 0
         self._debugOn = False
 
     def set_debug(self, debugOn):
         self._debugOn = debugOn
 
+    def make_move(self):
+        if self.game.make_move():
+            self._boards.append(self.game.get_board())
+            self._history_index = len(self._boards) - 1
+            self._draw_board()
+
+    def inc_history_index(self):
+        if self._history_index < len(self._boards) - 1:
+            self._history_index += 1
+            self._draw_board()
+
+    def dec_history_index(self):
+        if self._history_index > 0:
+            self._history_index -= 1
+            self._draw_board()
+
+    def get_summary(self):
+        outcome = self.game.get_outcome()
+        assert outcome is not None
+        return {
+            'X player': self.game.get_Xmover(),
+            'O player': self.game.get_Omover(),
+            'outcome': outcome,
+            'history': self._boards
+        }
+
     def new_game(self, Xmover, Omover):
+        self._boards = [0]
+        self._history_index = 0
         self.game = Game(SIZE, Xmover=Xmover, Omover=Omover, debugOn=self._debugOn)
+        self._draw_board()
         timer()
 
     def stop_game(self):
         self.game = None
+
+    def _draw_board(self):
+        draw_board(self._boards[self._history_index], OFFSET)
 
 
 # ----------------------------------------------------------------------
@@ -57,10 +92,10 @@ gamewrapper = GameWrapper()
 # ----------------------------------------------------------------------
 
 
-def draw_game(board, offset):
+def draw_board(board, offset):
     canvas.delete('all')
     draw_grid()
-    draw_board(board, offset)
+    draw_pieces(board, offset)
 
 
 def draw_grid():
@@ -70,7 +105,7 @@ def draw_grid():
         canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
 
 
-def draw_board(board, offset):
+def draw_pieces(board, offset):
     O_board = board >> offset
     for i in range(offset):
         if board & 1:
@@ -131,7 +166,7 @@ def history_command():
         if name:
             replay_game(name)
 
-    names = [name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')]
+    names = sorted((name for name in os.listdir(HISTORY_DIR) if name.endswith('.json')), reverse=True)
 
     window = tkinter.Toplevel()
     window.wm_title('History')
@@ -160,8 +195,7 @@ def replay_game(name):
 def timer():
     if gamewrapper.game is not None:
 
-        gamewrapper.game.make_move()
-        draw_game(gamewrapper.game.get_board(), gamewrapper.game.get_offset())
+        gamewrapper.make_move()
         outcome = gamewrapper.game.get_outcome()
 
         if outcome is not None:
@@ -173,7 +207,7 @@ def timer():
 
 
 def save_summary():
-    summary = json.dumps(gamewrapper.game.get_summary())
+    summary = json.dumps(gamewrapper.get_summary())
 
     if not os.path.isdir(HISTORY_DIR):
         os.mkdir(HISTORY_DIR)
@@ -215,9 +249,13 @@ def main(args):
 
     new_game_button = tkinter.Button(root, text='New game', command=new_game_command)
     history_button = tkinter.Button(root, text='History', command=history_command)
+    history_dec_button = tkinter.Button(root, text='<-', command=gamewrapper.dec_history_index)
+    history_inc_button = tkinter.Button(root, text='->', command=gamewrapper.inc_history_index)
 
     canvas.pack()
     new_game_button.pack(side=tkinter.LEFT)
     history_button.pack(side=tkinter.LEFT)
+    history_dec_button.pack(side=tkinter.LEFT)
+    history_inc_button.pack(side=tkinter.LEFT)
 
     root.mainloop()
