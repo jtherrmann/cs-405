@@ -63,6 +63,12 @@ class Game:
         self._moveX_func = self._get_move_func(Xmover)
         self._moveO_func = self._get_move_func(Omover)
 
+    def active(self):
+        return self._game_active
+
+    def handle_click(self, event):
+        self._human_move = point_to_index(event.x, event.y)
+
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
             self._history_index += 1
@@ -121,22 +127,6 @@ class Game:
         else:
             tkinter.messagebox.showerror(message='Selected game used a different board size')
 
-    def active(self):
-        return self._game_active
-
-    def handle_click(self, event):
-        self._human_move = point_to_index(event.x, event.y)
-
-    def _current_board(self):
-        return self._boards[-1]
-
-    def _refresh_display(self):
-        draw_board(self._boards[self._history_index])
-        status_line['text'] = self._get_status()
-
-    def _get_status(self):
-        return f'{self._Xmover} (X) vs. {self._Omover} (O)\nResult: {self._outcome}\nMove: {self._history_index}'
-
     def _save_summary(self):
         summary = json.dumps(
             {'X player': self._Xmover,
@@ -147,6 +137,16 @@ class Game:
         )
         with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
             f.write(summary)
+
+    def _current_board(self):
+        return self._boards[-1]
+
+    def _refresh_display(self):
+        draw_board(self._boards[self._history_index])
+        status_line['text'] = self._get_status()
+
+    def _get_status(self):
+        return f'{self._Xmover} (X) vs. {self._Omover} (O)\nResult: {self._outcome}\nMove: {self._history_index}'
 
     def _human_move_func(self):
         human_move = self._human_move
@@ -159,7 +159,7 @@ class Game:
 
 
 # ----------------------------------------------------------------------
-# Setup
+# Global objects
 # ----------------------------------------------------------------------
 
 root = tkinter.Tk()
@@ -169,36 +169,13 @@ game = Game()
 
 
 # ----------------------------------------------------------------------
-# Drawing functions
+# Timer
 # ----------------------------------------------------------------------
 
-def draw_board(board):
-    canvas.delete('all')
-    draw_grid()
-    draw_pieces(board)
-
-
-def draw_grid():
-    for cell in range(core.SIZE):
-        pos = cell * CELL_SIZE
-        canvas.create_line(pos, 0, pos, CANVAS_SIZE, fill=FG)
-        canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
-
-
-def draw_pieces(board):
-    O_board = board >> core.OFFSET
-    for i in range(core.OFFSET):
-        if board & 1:
-            draw_piece(i, 'X')
-        if O_board & 1:
-            draw_piece(i, 'O')
-        board >>= 1
-        O_board >>= 1
-
-
-def draw_piece(index, char):
-    x, y = index_to_point(index)
-    canvas.create_text(x, y, text=char, font='Mono 32', fill=FG)
+def timer():
+    if game.active():
+        game.make_move()
+        root.after(50, timer)
 
 
 # ----------------------------------------------------------------------
@@ -258,13 +235,36 @@ def history_command():
 
 
 # ----------------------------------------------------------------------
-# Timer loop
+# Drawing functions
 # ----------------------------------------------------------------------
 
-def timer():
-    if game.active():
-        game.make_move()
-        root.after(50, timer)
+def draw_board(board):
+    canvas.delete('all')
+    draw_grid()
+    draw_pieces(board)
+
+
+def draw_grid():
+    for cell in range(core.SIZE):
+        pos = cell * CELL_SIZE
+        canvas.create_line(pos, 0, pos, CANVAS_SIZE, fill=FG)
+        canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
+
+
+def draw_pieces(board):
+    O_board = board >> core.OFFSET
+    for i in range(core.OFFSET):
+        if board & 1:
+            draw_piece(i, 'X')
+        if O_board & 1:
+            draw_piece(i, 'O')
+        board >>= 1
+        O_board >>= 1
+
+
+def draw_piece(index, char):
+    x, y = index_to_point(index)
+    canvas.create_text(x, y, text=char, font='Mono 32', fill=FG)
 
 
 # ----------------------------------------------------------------------
