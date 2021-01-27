@@ -106,17 +106,20 @@ class Game:
         with open(os.path.join(HISTORY_DIR, name), 'r') as f:
             summary = json.loads(f.read())
 
-        self._set_game_fields(
-            game_active=False,
-            Xmover=summary['X player'],
-            Omover=summary['O player'],
-            outcome=summary['outcome'],
-            moveX=True,
-            human_move=None,
-            boards=summary['history'],
-            history_index=len(summary['history']) - 1
-        )
-        self._refresh_display()
+        if summary['size'] == core.SIZE:
+            self._set_game_fields(
+                game_active=False,
+                Xmover=summary['X player'],
+                Omover=summary['O player'],
+                outcome=summary['outcome'],
+                moveX=True,
+                human_move=None,
+                boards=summary['history'],
+                history_index=len(summary['history']) - 1
+            )
+            self._refresh_display()
+        else:
+            tkinter.messagebox.showerror(message='Selected game used a different board size')
 
     def active(self):
         return self._game_active
@@ -136,7 +139,11 @@ class Game:
 
     def _save_summary(self):
         summary = json.dumps(
-            {'X player': self._Xmover, 'O player': self._Omover, 'outcome': self._outcome, 'history': self._boards}
+            {'X player': self._Xmover,
+             'O player': self._Omover,
+             'outcome': self._outcome,
+             'size': core.SIZE,
+             'history': self._boards}
         )
         with open(os.path.join(HISTORY_DIR, datetime.now(timezone.utc).isoformat() + '.json'), 'w') as f:
             f.write(summary)
