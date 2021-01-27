@@ -12,17 +12,11 @@ from . import core, debug
 # Constants
 # ----------------------------------------------------------------------
 
-SIZE = 4
-OFFSET = SIZE * SIZE
 CELL_SIZE = 100
-CANVAS_SIZE = SIZE * CELL_SIZE
-
-WIN_STATES = core.get_win_states(SIZE)
+CANVAS_SIZE = core.SIZE * CELL_SIZE
 
 BG = 'black'
 FG = 'white'
-
-TIMER_MS = 50
 
 HISTORY_DIR = 'game-history'
 
@@ -81,11 +75,11 @@ class Game:
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
-        board = core.add_move(index, self._moveX, self._current_board(), OFFSET)
+        board = core.add_move(index, self._moveX, self._current_board())
 
         if board is not None:
             self._boards.append(board)
-            self._outcome = core.check_outcome(self._current_board(), OFFSET, WIN_STATES)
+            self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
             self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
             self._draw_board()
@@ -154,7 +148,7 @@ class Game:
 
     @staticmethod
     def _random_move_func():
-        return randint(0, OFFSET - 1)
+        return randint(0, core.OFFSET - 1)
 
 
 # ----------------------------------------------------------------------
@@ -178,15 +172,15 @@ def draw_board(board):
 
 
 def draw_grid():
-    for cell in range(SIZE):
+    for cell in range(core.SIZE):
         pos = cell * CELL_SIZE
         canvas.create_line(pos, 0, pos, CANVAS_SIZE, fill=FG)
         canvas.create_line(0, pos, CANVAS_SIZE, pos, fill=FG)
 
 
 def draw_pieces(board):
-    O_board = board >> OFFSET
-    for i in range(OFFSET):
+    O_board = board >> core.OFFSET
+    for i in range(core.OFFSET):
         if board & 1:
             draw_piece(i, 'X')
         if O_board & 1:
@@ -263,7 +257,7 @@ def history_command():
 def timer():
     if game.active():
         game.make_move()
-        root.after(TIMER_MS, timer)
+        root.after(50, timer)
 
 
 # ----------------------------------------------------------------------
@@ -273,11 +267,11 @@ def timer():
 def point_to_index(x, y):
     row = y // CELL_SIZE
     col = x // CELL_SIZE
-    return SIZE * row + col
+    return core.SIZE * row + col
 
 
 def index_to_point(index):
-    row, col = divmod(index, SIZE)
+    row, col = divmod(index, core.SIZE)
     return center_coord(col), center_coord(row)
 
 
@@ -291,7 +285,7 @@ def center_coord(row_or_col):
 
 def main(args):
     if args.debug:
-        debug.print_win_states(WIN_STATES, SIZE)
+        debug.print_win_states(core.WIN_STATES, core.SIZE)
 
     if not os.path.isdir(HISTORY_DIR):
         os.mkdir(HISTORY_DIR)
