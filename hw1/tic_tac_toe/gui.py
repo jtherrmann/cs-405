@@ -67,7 +67,8 @@ class Game:
         return self._game_active
 
     def handle_click(self, event):
-        self._human_move = point_to_index(event.x, event.y)
+        if self._history_index == len(self._boards) - 1:
+            self._human_move = point_to_index(event.x, event.y)
 
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
