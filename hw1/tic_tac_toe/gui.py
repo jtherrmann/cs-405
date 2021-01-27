@@ -66,12 +66,12 @@ class Game:
     def inc_history_index(self):
         if self._history_index < len(self._boards) - 1:
             self._history_index += 1
-            self._draw_board()
+            self._refresh_display()
 
     def dec_history_index(self):
         if self._history_index > 0:
             self._history_index -= 1
-            self._draw_board()
+            self._refresh_display()
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
@@ -82,7 +82,7 @@ class Game:
             self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
             self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
-            self._draw_board()
+            self._refresh_display()
 
             if self._outcome is not None:
                 self._game_active = False
@@ -99,7 +99,7 @@ class Game:
             boards=[0],
             history_index=0
         )
-        self._draw_board()
+        self._refresh_display()
         timer()
 
     def load_old_game(self, name):
@@ -116,7 +116,7 @@ class Game:
             boards=summary['history'],
             history_index=len(summary['history']) - 1
         )
-        self._draw_board()
+        self._refresh_display()
 
     def active(self):
         return self._game_active
@@ -127,7 +127,7 @@ class Game:
     def _current_board(self):
         return self._boards[-1]
 
-    def _draw_board(self):
+    def _refresh_display(self):
         draw_board(self._boards[self._history_index])
         status_line['text'] = self._get_status()
 
