@@ -37,6 +37,16 @@ class Game:
     def _get_move_func(self, name):
         return getattr(self, Game.move_funcs[name])
 
+    def _human_move_func(self):
+        human_move = self._human_move
+        self._human_move = None
+        if human_move in core.legal_moves(self._current_board()):
+            return human_move
+
+    def _random_move_func(self):
+        moves = core.legal_moves(self._current_board())
+        return moves[randint(0, len(moves) - 1)]
+
     def __init__(self):
         self._game_active = False
         self._Xmover = None
@@ -82,10 +92,9 @@ class Game:
 
     def make_move(self):
         index = self._moveX_func() if self._moveX else self._moveO_func()
-        board = core.add_move(index, self._moveX, self._current_board())
 
-        if board is not None:
-            self._boards.append(board)
+        if index is not None:
+            self._boards.append(core.add_move(index, self._moveX, self._current_board()))
             self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
             self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
@@ -148,15 +157,6 @@ class Game:
 
     def _get_status(self):
         return f'{self._Xmover} (X) vs. {self._Omover} (O)\nResult: {self._outcome}\nMove: {self._history_index}'
-
-    def _human_move_func(self):
-        human_move = self._human_move
-        self._human_move = None
-        return human_move
-
-    @staticmethod
-    def _random_move_func():
-        return randint(0, core.OFFSET - 1)
 
 
 # ----------------------------------------------------------------------

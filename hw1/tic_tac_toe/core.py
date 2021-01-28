@@ -25,15 +25,22 @@ WIN_STATES = get_win_states()
 
 
 def add_move(index, moveX, board):
-    if index is None:
-        return None
-
+    assert index in legal_moves(board), f'Index: {index}'
     bit = 1 << index
-    offset_bit = bit << OFFSET
-    if board & bit != 0 or board & offset_bit != 0:
-        return None
+    if not moveX:
+        bit <<= OFFSET
+    return board | bit
 
-    return board | bit if moveX else board | offset_bit
+
+def legal_moves(board):
+    moves = []
+    O_board = board >> OFFSET
+    for i in range(OFFSET):
+        if not ((board & 1) | (O_board & 1)):
+            moves.append(i)
+        board >>= 1
+        O_board >>= 1
+    return moves
 
 
 def check_outcome(board, win_states):
