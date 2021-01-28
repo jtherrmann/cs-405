@@ -38,10 +38,11 @@ class Game:
         return getattr(self, Game.move_funcs[name])
 
     def _human_move_func(self):
-        human_move = self._human_move
-        self._human_move = None
-        if human_move in core.legal_moves(self._current_board()):
-            return human_move
+        if self._human_move is not None:
+            human_move = self._human_move
+            self._human_move = None
+            if human_move in core.legal_moves(self._current_board()):
+                return human_move
 
     def _random_move_func(self):
         moves = core.legal_moves(self._current_board())
