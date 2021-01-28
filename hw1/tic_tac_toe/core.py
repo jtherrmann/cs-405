@@ -25,7 +25,6 @@ WIN_STATES = get_win_states()
 
 
 def add_move(index, moveX, board):
-    assert index in legal_moves(board), f'Index: {index}'
     bit = 1 << index
     if not moveX:
         bit <<= OFFSET

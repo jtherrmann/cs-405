@@ -94,6 +94,7 @@ class Game:
         index = self._moveX_func() if self._moveX else self._moveO_func()
 
         if index is not None:
+            assert index in core.legal_moves(self._current_board())
             self._boards.append(core.add_move(index, self._moveX, self._current_board()))
             self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
             self._moveX = not self._moveX
