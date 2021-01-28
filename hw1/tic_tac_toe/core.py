@@ -59,7 +59,7 @@ def check_outcome(board, win_states):
 
 def is_full(board):
     count = 0
-    while board != 0:
+    for _ in range(OFFSET * 2):
         count += board & 1
         board >>= 1
     return count == OFFSET
