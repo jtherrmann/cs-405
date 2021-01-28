@@ -53,7 +53,6 @@ class Game:
         self._Xmover = None
         self._Omover = None
         self._outcome = None
-        self._moveX = True
         self._human_move = None
         self._boards = []
         self._history_index = 0
@@ -61,12 +60,11 @@ class Game:
         self._moveX_func = None
         self._moveO_func = None
 
-    def _set_game_fields(self, game_active, Xmover, Omover, outcome, moveX, human_move, boards, history_index):
+    def _set_game_fields(self, game_active, Xmover, Omover, outcome, human_move, boards, history_index):
         self._game_active = game_active
         self._Xmover = Xmover
         self._Omover = Omover
         self._outcome = outcome
-        self._moveX = moveX
         self._human_move = human_move
         self._boards = boards
         self._history_index = history_index
@@ -92,13 +90,12 @@ class Game:
             self._refresh_display()
 
     def make_move(self):
-        index = self._moveX_func() if self._moveX else self._moveO_func()
+        index = self._moveX_func() if core.turn_X(self._current_board()) else self._moveO_func()
 
         if index is not None:
             assert index in core.legal_moves(self._current_board())
-            self._boards.append(core.add_move(index, self._moveX, self._current_board()))
+            self._boards.append(core.add_move(index, self._current_board()))
             self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
-            self._moveX = not self._moveX
             self._history_index = len(self._boards) - 1
             self._refresh_display()
 
@@ -112,9 +109,8 @@ class Game:
             Xmover=Xmover,
             Omover=Omover,
             outcome=None,
-            moveX=True,
             human_move=None,
-            boards=[0],
+            boards=[core.TURN_BIT],
             history_index=0
         )
         self._refresh_display()
@@ -130,7 +126,6 @@ class Game:
                 Xmover=summary['X player'],
                 Omover=summary['O player'],
                 outcome=summary['outcome'],
-                moveX=True,
                 human_move=None,
                 boards=summary['history'],
                 history_index=len(summary['history']) - 1
