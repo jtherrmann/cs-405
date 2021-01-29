@@ -110,7 +110,7 @@ class Game:
             Omover=Omover,
             outcome=None,
             human_move=None,
-            boards=[1],
+            boards=[core.EMPTY_BOARD],
             history_index=0
         )
         self._refresh_display()

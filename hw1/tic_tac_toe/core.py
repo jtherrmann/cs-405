@@ -1,5 +1,6 @@
 SIZE = 4
 OFFSET = SIZE * SIZE
+EMPTY_BOARD = 0b1
 
 
 def get_win_states():
