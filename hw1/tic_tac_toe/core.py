@@ -65,6 +65,18 @@ def is_full(pieces):
     return count == OFFSET
 
 
+def split_indices(board):
+    pieces, O_pieces = split_board(board)
+    return get_indices(pieces), get_indices(O_pieces)
+
+
+def get_indices(pieces):
+    for i in range(OFFSET):
+        if pieces & 1:
+            yield i
+        pieces >>= 1
+
+
 def split_board(board):
     pieces = board >> 1
     return pieces, pieces >> OFFSET

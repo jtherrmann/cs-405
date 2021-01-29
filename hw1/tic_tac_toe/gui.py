@@ -250,16 +250,11 @@ def draw_grid():
 
 
 def draw_pieces(board):
-    # TODO move bitwise logic to core
-    pieces, O_pieces = core.split_board(board)
-    for i in range(core.OFFSET):
-        if pieces & 1:
-            assert not (O_pieces & 1)
-            draw_piece(i, 'X')
-        elif O_pieces & 1:
-            draw_piece(i, 'O')
-        pieces >>= 1
-        O_pieces >>= 1
+    X_indices, O_indices = core.split_indices(board)
+    for i in X_indices:
+        draw_piece(i, 'X')
+    for i in O_indices:
+        draw_piece(i, 'O')
 
 
 def draw_piece(index, char):
