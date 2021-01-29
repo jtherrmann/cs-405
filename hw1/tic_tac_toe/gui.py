@@ -110,7 +110,7 @@ class Game:
             Omover=Omover,
             outcome=None,
             human_move=None,
-            boards=[core.TURN_BIT],
+            boards=[1],
             history_index=0
         )
         self._refresh_display()
@@ -250,14 +250,16 @@ def draw_grid():
 
 
 def draw_pieces(board):
-    O_board = board >> core.OFFSET
+    # TODO move bitwise logic to core
+    pieces, O_pieces = core.split_board(board)
     for i in range(core.OFFSET):
-        if board & 1:
+        if pieces & 1:
+            assert not (O_pieces & 1)
             draw_piece(i, 'X')
-        if O_board & 1:
+        elif O_pieces & 1:
             draw_piece(i, 'O')
-        board >>= 1
-        O_board >>= 1
+        pieces >>= 1
+        O_pieces >>= 1
 
 
 def draw_piece(index, char):
