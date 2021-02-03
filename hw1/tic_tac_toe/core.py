@@ -5,19 +5,36 @@ EMPTY_BOARD = 0
 
 def get_win_states():
     states = []
+
+    # Rows
+    row_mask = 2**SIZE - 1
+    for row in range(SIZE):
+        state = row_mask << (row * SIZE)
+        states.append(state)
+
+    # Columns
     for col in range(SIZE):
-        state = 1 << col
+        col_bit = 1 << col
+        state = col_bit
         for _ in range(SIZE - 1):
             state <<= SIZE
-            state |= 1 << col
+            state |= col_bit
         states.append(state)
 
-    mask = 2**SIZE - 1
-    for row in range(SIZE):
-        state = mask << (row * SIZE)
-        states.append(state)
+    # Upper-left diagonal
+    state = 1
+    for _ in range(SIZE - 1):
+        state <<= (SIZE + 1)
+        state |= 1
+    states.append(state)
 
-    # TODO diagonals
+    # Upper-right diagonal
+    top_right_bit = 1 << (SIZE - 1)
+    state = top_right_bit
+    for _ in range(SIZE - 1):
+        state <<= (SIZE - 1)
+        state |= top_right_bit
+    states.append(state)
 
     return states
 
