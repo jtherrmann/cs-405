@@ -36,14 +36,13 @@ def turn_bit(board):
 
 
 def legal_moves(board):
-    # TODO refactor?
     moves = []
     pieces, O_pieces = split_board(board)
+    pieces |= O_pieces
     for i in range(OFFSET):
-        if not ((pieces & 1) | (O_pieces & 1)):
+        if not (pieces & 1):
             moves.append(i)
         pieces >>= 1
-        O_pieces >>= 1
     return moves
 
 
