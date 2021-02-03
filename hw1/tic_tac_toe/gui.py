@@ -90,12 +90,12 @@ class Game:
             self._refresh_display()
 
     def make_move(self):
-        index = self._moveX_func() if core.turn_X(self._current_board()) else self._moveO_func()
+        index = self._moveO_func() if core.turn_bit(self._current_board()) else self._moveX_func()
 
         if index is not None:
             assert index in core.legal_moves(self._current_board())
             self._boards.append(core.add_move(index, self._current_board()))
-            self._outcome = core.check_outcome(self._current_board(), core.WIN_STATES)
+            self._outcome = core.check_outcome(self._current_board())
             self._history_index = len(self._boards) - 1
             self._refresh_display()
 

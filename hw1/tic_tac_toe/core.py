@@ -1,6 +1,6 @@
 SIZE = 4
 OFFSET = SIZE * SIZE
-EMPTY_BOARD = 0b1
+EMPTY_BOARD = 0
 
 
 def get_win_states():
@@ -27,13 +27,12 @@ WIN_STATES = get_win_states()
 
 def add_move(index, board):
     move_bit = 0b10 << index
-    if not turn_X(board):
-        move_bit <<= OFFSET
+    move_bit <<= (OFFSET * turn_bit(board))
     return (board ^ 1) | move_bit
 
 
-def turn_X(board):
-    return bool(board & 1)
+def turn_bit(board):
+    return board & 1
 
 
 def legal_moves(board):
@@ -48,9 +47,9 @@ def legal_moves(board):
     return moves
 
 
-def check_outcome(board, win_states):
+def check_outcome(board):
     pieces, O_pieces = split_board(board)
-    for state in win_states:
+    for state in WIN_STATES:
         if pieces & state == state:
             return 1
         if O_pieces & state == state:
