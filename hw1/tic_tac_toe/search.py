@@ -16,7 +16,8 @@ class Tree:
         self._update_root(board)
 
         t1 = time()
-        minimax(self._root)
+        # noinspection PyUnusedLocal
+        nodes_visited, nodes_created = minimax(self._root)
         t2 = time()
 
         # noinspection PyUnusedLocal
@@ -24,6 +25,8 @@ class Tree:
 
         # noinspection PyUnreachableCode
         if __debug__:
+            print(f'Nodes visited: {nodes_visited}')
+            print(f'Nodes created: {nodes_created}')
             print(f'Search time: {total} ms\n')
 
         self._root = self._root.best_child
@@ -55,27 +58,32 @@ tree = Tree()
 
 
 def minimax(node: Node, depth=5):
+    nodes_visited, nodes_created = 1, 0
+
     node.best_child = None
     node.val = core.check_outcome(node.board)  # TODO store outcome in node?
 
     if node.val is not None:
-        return
+        return nodes_visited, nodes_created
 
     if depth == 0:
         node.val = eval_board(node.board)
-        return
+        return nodes_visited, nodes_created
 
     if not node.children:
         node.children = [
             Node(board=core.add_move(index, node.board), move=index)
             for index in core.legal_moves(node.board)
         ]
+        nodes_created += len(node.children)
 
     min_node = core.turn_bit(node.board)
     node.val, compare = (core.INF, lt) if min_node else (core.NEG_INF, gt)
 
     for child in node.children:
-        minimax(child, depth - 1)
+        result = minimax(child, depth - 1)
+        nodes_visited += result[0]
+        nodes_created += result[1]
         if compare(child.val, node.val):
             node.val = child.val
             node.best_child = child
@@ -83,3 +91,5 @@ def minimax(node: Node, depth=5):
     if node.best_child is None:
         node.best_child = node.children[0]
         assert node.val == node.best_child.val
+
+    return nodes_visited, nodes_created
