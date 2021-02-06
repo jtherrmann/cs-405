@@ -53,7 +53,7 @@ class Game:
         board = self._current_board()
         if board == core.EMPTY_BOARD:
             return core.MID_INDEX
-        return search.minimax(board, get_val=False)
+        return search.tree.get_move(board)
 
     def __init__(self):
         self._game_active = False

@@ -1,20 +1,73 @@
+from dataclasses import dataclass
+from operator import lt, gt
+from typing import List, Any
+
 from . import core
 from .evaluate import eval_board
 
 
-def minimax(board, depth=5, get_val=True):
-    outcome = core.check_outcome(board)
-    if outcome is not None:
-        return outcome
+class Tree:
+
+    def __init__(self):
+        self._root = Node(board=core.EMPTY_BOARD)
+
+    def get_move(self, board):
+        self._update_root(board)
+        minimax(self._root)
+        self._root = self._root.best_child
+        return self._root.move
+
+    def _update_root(self, board):
+        if self._root.board != board:
+            for child in self._root.children:
+                if child.board == board:
+                    self._root = child
+                    return
+            # noinspection PyUnreachableCode
+            if __debug__:
+                print('Replacing tree\n')
+            self._root = Node(board=board)
+
+
+# TODO refactor gui so do not have to store move
+@dataclass
+class Node:
+    board: int
+    move: int = None
+    val: float = None
+    children: List = ()
+    best_child: Any = None  # TODO don't store this in node?
+
+
+tree = Tree()
+
+
+def minimax(node: Node, depth=5):
+    node.best_child = None
+    node.val = core.check_outcome(node.board)  # TODO store outcome in node?
+
+    if node.val is not None:
+        return
 
     if depth == 0:
-        return eval_board(board)
+        node.val = eval_board(node.board)
+        return
 
-    moves = core.legal_moves(board)
-    vals = [minimax(core.add_move(index, board), depth - 1) for index in moves]
+    if not node.children:
+        node.children = [
+            Node(board=core.add_move(index, node.board), move=index)
+            for index in core.legal_moves(node.board)
+        ]
 
-    result = min(vals) if core.turn_bit(board) else max(vals)
-    if get_val:
-        return result
+    min_node = core.turn_bit(node.board)
+    node.val, compare = (core.INF, lt) if min_node else (core.NEG_INF, gt)
 
-    return moves[vals.index(result)]
+    for child in node.children:
+        minimax(child, depth - 1)
+        if compare(child.val, node.val):
+            node.val = child.val
+            node.best_child = child
+
+    if node.best_child is None:
+        node.best_child = node.children[0]
+        assert node.val == node.best_child.val
