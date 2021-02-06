@@ -50,7 +50,10 @@ class Game:
         return moves[randint(0, len(moves) - 1)]
 
     def _engine_move_func(self):
-        return search.minimax(self._current_board(), get_val=False)
+        board = self._current_board()
+        if board == core.EMPTY_BOARD:
+            return core.MID_INDEX
+        return search.minimax(board, get_val=False)
 
     def __init__(self):
         self._game_active = False

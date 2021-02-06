@@ -6,6 +6,14 @@ INF = float('inf')
 NEG_INF = -INF
 
 
+def mid_index():
+    mid_coord = (SIZE - 1) // 2
+    return SIZE * mid_coord + mid_coord
+
+
+MID_INDEX = mid_index()
+
+
 def get_win_states():
     states = []
 
