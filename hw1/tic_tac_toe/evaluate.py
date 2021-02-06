@@ -14,9 +14,15 @@ def eval_turn(board):
 
 def eval_max_connected(board):
     pieces, O_pieces = core.split_board(board)
-    return max_connected(pieces) - max_connected(O_pieces)
+    return max_connected(pieces, O_pieces) - max_connected(O_pieces, pieces)
 
 
-def max_connected(pieces):
-    # TODO don't count a sequence if it includes an enemy piece
-    return max(core.count_bits(pieces & state) for state in core.WIN_STATES)
+def max_connected(pieces, enemy_pieces):
+    return max(count_connected(pieces, enemy_pieces, state) for state in core.WIN_STATES)
+
+
+def count_connected(pieces, enemy_pieces, win_state):
+    count = core.count_bits(pieces & win_state)
+    if not (enemy_pieces & win_state):
+        return count
+    return 0
