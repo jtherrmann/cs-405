@@ -5,7 +5,7 @@ import tkinter.messagebox
 from datetime import datetime, timezone
 from random import randint
 
-from . import core, debug
+from . import core
 
 
 # ----------------------------------------------------------------------
@@ -60,6 +60,8 @@ class Game:
         self._moveX_func = None
         self._moveO_func = None
 
+        self._debug = False
+
     def _set_game_fields(self, game_active, Xmover, Omover, outcome, human_move, boards, history_index):
         self._game_active = game_active
         self._Xmover = Xmover
@@ -71,6 +73,9 @@ class Game:
 
         self._moveX_func = self._get_move_func(Xmover)
         self._moveO_func = self._get_move_func(Omover)
+
+    def set_debug(self, debug):
+        self._debug = debug
 
     def active(self):
         return self._game_active
@@ -125,7 +130,7 @@ class Game:
                 game_active=False,
                 Xmover=summary['X player'],
                 Omover=summary['O player'],
-                outcome=summary['outcome'],
+                outcome=self._parse_outcome(summary['outcome']),
                 human_move=None,
                 boards=summary['history'],
                 history_index=len(summary['history']) - 1
@@ -138,7 +143,7 @@ class Game:
         summary = json.dumps(
             {'X player': self._Xmover,
              'O player': self._Omover,
-             'outcome': self._outcome,
+             'outcome': str(self._outcome),
              'size': core.SIZE,
              'history': self._boards}
         )
@@ -153,7 +158,31 @@ class Game:
         status_line['text'] = self._get_status()
 
     def _get_status(self):
-        return f'{self._Xmover} (X) vs. {self._Omover} (O)\nResult: {self._outcome}\nMove: {self._history_index}'
+        return '\n'.join([
+            f'{self._Xmover} (X) vs. {self._Omover} (O)',
+            f'Result: {self._outcome_status(self._outcome)}',
+            f'Move: {self._history_index}'
+        ])
+
+    @staticmethod
+    def _outcome_status(outcome):
+        if outcome is core.INF:
+            return 'X wins'
+        if outcome is core.NEG_INF:
+            return 'O wins'
+        if outcome == 0:
+            return 'draw'
+        assert outcome is None
+        return 'none'
+
+    @staticmethod
+    def _parse_outcome(outcome_str):
+        if outcome_str == 'inf':
+            return core.INF
+        if outcome_str == '-inf':
+            return core.NEG_INF
+        assert outcome_str == '0'
+        return 0
 
 
 # ----------------------------------------------------------------------
@@ -286,8 +315,10 @@ def center_coord(row_or_col):
 # ----------------------------------------------------------------------
 
 def main(args):
+    game.set_debug(args.debug)
+
     if args.debug:
-        debug.print_win_states(core.WIN_STATES, core.SIZE)
+        core.print_win_states()
 
     if not os.path.isdir(HISTORY_DIR):
         os.mkdir(HISTORY_DIR)

@@ -2,6 +2,9 @@ SIZE = 4
 OFFSET = SIZE * SIZE
 EMPTY_BOARD = 0
 
+INF = float('inf')
+NEG_INF = -INF
+
 
 def get_win_states():
     states = []
@@ -67,18 +70,18 @@ def check_outcome(board):
     pieces, O_pieces = split_board(board)
     for state in WIN_STATES:
         if pieces & state == state:
-            return 1
+            return INF
         if O_pieces & state == state:
-            return -1
-    return 0 if is_full(pieces) else None
+            return NEG_INF
+    return 0 if count_bits(pieces) == OFFSET else None
 
 
-def is_full(pieces):
+def count_bits(num):
     count = 0
-    while pieces != 0:
-        count += pieces & 1
-        pieces >>= 1
-    return count == OFFSET
+    while num != 0:
+        count += num & 1
+        num >>= 1
+    return count
 
 
 def split_indices(board):
@@ -96,3 +99,21 @@ def get_indices(pieces):
 def split_board(board):
     pieces = board >> 1
     return pieces, pieces >> OFFSET
+
+
+def print_win_states():
+    print('Win states:\n')
+    for state in WIN_STATES:
+        print_win_state(state, SIZE)
+        print()
+    print('(End win states)\n')
+
+
+def print_win_state(state, size):
+    for _ in range(size):
+        rowstr = ''
+        for _ in range(size):
+            rowstr += '# ' if state & 1 else '. '
+            state >>= 1
+        print(rowstr)
+    assert state == 0
