@@ -60,8 +60,6 @@ class Game:
         self._moveX_func = None
         self._moveO_func = None
 
-        self._debug = False
-
     def _set_game_fields(self, game_active, Xmover, Omover, outcome, human_move, boards, history_index):
         self._game_active = game_active
         self._Xmover = Xmover
@@ -73,9 +71,6 @@ class Game:
 
         self._moveX_func = self._get_move_func(Xmover)
         self._moveO_func = self._get_move_func(Omover)
-
-    def set_debug(self, debug):
-        self._debug = debug
 
     def active(self):
         return self._game_active
@@ -314,10 +309,9 @@ def center_coord(row_or_col):
 # Main
 # ----------------------------------------------------------------------
 
-def main(args):
-    game.set_debug(args.debug)
-
-    if args.debug:
+def main():
+    # noinspection PyUnreachableCode
+    if __debug__:
         core.print_win_states()
 
     if not os.path.isdir(HISTORY_DIR):
