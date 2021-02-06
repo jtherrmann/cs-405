@@ -5,8 +5,7 @@ import tkinter.messagebox
 from datetime import datetime, timezone
 from random import randint
 
-from . import core
-
+from . import core, search
 
 # ----------------------------------------------------------------------
 # Constants
@@ -28,10 +27,12 @@ HISTORY_DIR = 'game-history'
 class Game:
     HUMAN = 'Human'
     RANDOM = 'Random moves'
+    ENGINE = 'Engine'
 
     move_funcs = {
         HUMAN: '_human_move_func',
-        RANDOM: '_random_move_func'
+        RANDOM: '_random_move_func',
+        ENGINE: '_engine_move_func'
     }
 
     def _get_move_func(self, name):
@@ -47,6 +48,9 @@ class Game:
     def _random_move_func(self):
         moves = core.legal_moves(self._current_board())
         return moves[randint(0, len(moves) - 1)]
+
+    def _engine_move_func(self):
+        return search.minimax(self._current_board(), get_val=False)
 
     def __init__(self):
         self._game_active = False
@@ -151,6 +155,7 @@ class Game:
     def _refresh_display(self):
         draw_board(self._boards[self._history_index])
         status_line['text'] = self._get_status()
+        root.update()
 
     def _get_status(self):
         return '\n'.join([
