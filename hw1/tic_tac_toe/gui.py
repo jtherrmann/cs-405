@@ -310,10 +310,6 @@ def center_coord(row_or_col):
 # ----------------------------------------------------------------------
 
 def main():
-    # noinspection PyUnreachableCode
-    if __debug__:
-        core.print_win_states()
-
     if not os.path.isdir(HISTORY_DIR):
         os.mkdir(HISTORY_DIR)
 

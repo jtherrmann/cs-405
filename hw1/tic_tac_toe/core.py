@@ -45,6 +45,29 @@ def get_win_states():
 WIN_STATES = get_win_states()
 
 
+def print_win_states():
+    print('Win states:\n')
+    for state in WIN_STATES:
+        print_win_state(state, SIZE)
+        print()
+    print('(End win states)\n')
+
+
+def print_win_state(state, size):
+    for _ in range(size):
+        rowstr = ''
+        for _ in range(size):
+            rowstr += '# ' if state & 1 else '. '
+            state >>= 1
+        print(rowstr)
+    assert state == 0
+
+
+# noinspection PyUnreachableCode
+if __debug__:
+    print_win_states()
+
+
 def add_move(index, board):
     move_bit = 0b10 << index
     move_bit <<= (OFFSET * turn_bit(board))
@@ -99,21 +122,3 @@ def get_indices(pieces):
 def split_board(board):
     pieces = board >> 1
     return pieces, pieces >> OFFSET
-
-
-def print_win_states():
-    print('Win states:\n')
-    for state in WIN_STATES:
-        print_win_state(state, SIZE)
-        print()
-    print('(End win states)\n')
-
-
-def print_win_state(state, size):
-    for _ in range(size):
-        rowstr = ''
-        for _ in range(size):
-            rowstr += '# ' if state & 1 else '. '
-            state >>= 1
-        print(rowstr)
-    assert state == 0
