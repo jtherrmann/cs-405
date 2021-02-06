@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from operator import lt, gt
+from time import time
 from typing import List, Any
 
 from . import core
@@ -13,7 +14,20 @@ class Tree:
 
     def get_move(self, board):
         self._update_root(board)
+
+        # noinspection PyUnreachableCode
+        if __debug__:
+            # noinspection PyUnusedLocal
+            t1 = time()
+
         minimax(self._root)
+
+        # noinspection PyUnreachableCode
+        if __debug__:
+            t2 = time()
+            total = round((t2 - t1) * 10**3, ndigits=3)
+            print(f'Search time: {total} ms\n')
+
         self._root = self._root.best_child
         return self._root.move
 
