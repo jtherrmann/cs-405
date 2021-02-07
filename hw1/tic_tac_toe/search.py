@@ -51,7 +51,7 @@ class Node:
         self._val = core.check_outcome(self._board)
         self._leaf = self._val is not None
 
-        self._children = ()
+        self._children = []
 
     def is_leaf(self):
         return self._leaf
