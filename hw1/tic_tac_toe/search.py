@@ -1,4 +1,3 @@
-from operator import lt, gt
 from time import time
 
 from . import core
@@ -55,8 +54,8 @@ class Node:
     def is_leaf(self):
         return self._leaf
 
-    def is_min_node(self):
-        return bool(core.turn_bit(self._board))
+    def is_max_node(self):
+        return not core.turn_bit(self._board)
 
     def get_board(self):
         return self._board
@@ -98,18 +97,21 @@ def minimax(node: Node, depth=5):
 
     nodes_created += node.create_children()
 
-    if node.is_min_node():
-        node.set_val(core.INF)
-        compare = lt
+    if node.is_max_node():
+        new_val = core.NEG_INF
+        for child in node.get_children():
+            result = minimax(child, depth - 1)
+            nodes_visited += result[0]
+            nodes_created += result[1]
+            new_val = max(new_val, child.get_val())
     else:
-        node.set_val(core.NEG_INF)
-        compare = gt
+        new_val = core.INF
+        for child in node.get_children():
+            result = minimax(child, depth - 1)
+            nodes_visited += result[0]
+            nodes_created += result[1]
+            new_val = min(new_val, child.get_val())
 
-    for child in node.get_children():
-        result = minimax(child, depth - 1)
-        nodes_visited += result[0]
-        nodes_created += result[1]
-        if compare(child.get_val(), node.get_val()):
-            node.set_val(child.get_val())
+    node.set_val(new_val)
 
     return nodes_visited, nodes_created
