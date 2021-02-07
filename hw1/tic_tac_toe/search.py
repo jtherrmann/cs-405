@@ -78,10 +78,11 @@ class Node:
         return len(self._children)
 
     def get_best_child(self):
-        for child in self._children:
-            if child.get_val() == self._val:
-                return child
-        assert False
+        best_children = [child for child in self._children if child.get_val() == self._val]
+
+        # This is an arbitrary method of breaking ties, but makes debugging/testing
+        # easier because the selected child does not depend on the order of the children.
+        return min(best_children, key=lambda child: child.get_board())
 
 
 tree = Tree()
