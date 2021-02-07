@@ -8,9 +8,9 @@ from .evaluate import eval_board
 class Tree:
 
     def __init__(self):
-        self._root = Node(board=core.EMPTY_BOARD)
+        self._root = Node(core.EMPTY_BOARD)
 
-    def get_move(self, board):
+    def get_next_board(self, board):
         self._update_root(board)
 
         t1 = time()
@@ -28,7 +28,7 @@ class Tree:
             print(f'Search time: {total} ms\n')
 
         self._root = self._root.get_best_child()
-        return self._root.get_move()
+        return self._root.get_board()
 
     def _update_root(self, board):
         if self._root.get_board() != board:
@@ -39,15 +39,13 @@ class Tree:
             # noinspection PyUnreachableCode
             if __debug__:
                 print('Replacing tree\n')
-            self._root = Node(board=board)
+            self._root = Node(board)
 
 
-# TODO refactor gui so do not have to store move
 class Node:
 
-    def __init__(self, board, move=None):
+    def __init__(self, board):
         self._board = board
-        self._move = move
 
         self._val = core.check_outcome(self._board)
         self._leaf = self._val is not None
@@ -63,9 +61,6 @@ class Node:
     def get_board(self):
         return self._board
 
-    def get_move(self):
-        return self._move
-
     def get_val(self):
         return self._val
 
@@ -78,10 +73,7 @@ class Node:
     def create_children(self):
         if self._children:
             return 0
-        self._children = [
-            Node(board=core.add_move(index, self._board), move=index)
-            for index in core.legal_moves(self._board)
-        ]
+        self._children = [Node(board) for board in core.get_children(self._board)]
         return len(self._children)
 
     def get_best_child(self):

@@ -43,17 +43,17 @@ class Game:
             human_move = self._human_move
             self._human_move = None
             if human_move in core.legal_moves(self._current_board()):
-                return human_move
+                return core.add_move(human_move, self._current_board())
 
     def _random_move_func(self):
         moves = core.legal_moves(self._current_board())
-        return moves[randint(0, len(moves) - 1)]
+        return core.add_move(moves[randint(0, len(moves) - 1)], self._current_board())
 
     def _engine_move_func(self):
         board = self._current_board()
         if board == core.EMPTY_BOARD:
-            return core.MID_INDEX
-        return search.tree.get_move(board)
+            return core.add_move(core.MID_INDEX, core.EMPTY_BOARD)
+        return search.tree.get_next_board(board)
 
     def __init__(self):
         self._game_active = False
@@ -97,11 +97,11 @@ class Game:
             self._refresh_display()
 
     def make_move(self):
-        index = self._moveO_func() if core.turn_bit(self._current_board()) else self._moveX_func()
+        next_board = self._moveO_func() if core.turn_bit(self._current_board()) else self._moveX_func()
 
-        if index is not None:
-            assert index in core.legal_moves(self._current_board())
-            self._boards.append(core.add_move(index, self._current_board()))
+        if next_board is not None:
+            assert next_board in core.get_children(self._current_board())
+            self._boards.append(next_board)
             self._outcome = core.check_outcome(self._current_board())
             self._history_index = len(self._boards) - 1
             self._refresh_display()

@@ -97,6 +97,10 @@ def legal_moves(board):
     return moves
 
 
+def get_children(board):
+    return [add_move(index, board) for index in legal_moves(board)]
+
+
 def check_outcome(board):
     pieces, O_pieces = split_board(board)
     for state in WIN_STATES:
