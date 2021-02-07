@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from time import time
 
 from . import core
@@ -12,9 +13,10 @@ class Tree:
     def get_next_board(self, board):
         self._update_root(board)
 
+        stats = Stats()
+
         t1 = time()
-        # noinspection PyUnusedLocal
-        nodes_visited, nodes_created = minimax(self._root)
+        minimax(self._root, stats)
         t2 = time()
 
         # noinspection PyUnusedLocal
@@ -22,8 +24,8 @@ class Tree:
 
         # noinspection PyUnreachableCode
         if __debug__:
-            print(f'Nodes visited: {nodes_visited}')
-            print(f'Nodes created: {nodes_created}')
+            print(f'Nodes visited: {stats.visited}')
+            print(f'Nodes created: {stats.created}')
             print(f'Search time: {total} ms\n')
 
         self._root = self._root.get_best_child()
@@ -85,24 +87,28 @@ class Node:
 tree = Tree()
 
 
-def minimax(node: Node, alpha=core.NEG_INF, beta=core.INF, depth=5):
-    nodes_visited, nodes_created = 1, 0
+@dataclass
+class Stats:
+    visited = 0
+    created = 0
+
+
+def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=5):
+    stats.visited += 1
 
     if node.is_leaf():
-        return nodes_visited, nodes_created
+        return
 
     if depth == 0:
         node.set_val(eval_board(node.get_board()))
-        return nodes_visited, nodes_created
+        return
 
-    nodes_created += node.create_children()
+    stats.created += node.create_children()
 
     if node.is_max_node():
         new_val = core.NEG_INF
         for child in node.get_children():
-            result = minimax(child, alpha, beta, depth - 1)
-            nodes_visited += result[0]
-            nodes_created += result[1]
+            minimax(child, stats, alpha, beta, depth - 1)
             new_val = max(new_val, child.get_val())
             alpha = max(alpha, new_val)
             if alpha >= beta:
@@ -110,14 +116,10 @@ def minimax(node: Node, alpha=core.NEG_INF, beta=core.INF, depth=5):
     else:
         new_val = core.INF
         for child in node.get_children():
-            result = minimax(child, alpha, beta, depth - 1)
-            nodes_visited += result[0]
-            nodes_created += result[1]
+            minimax(child, stats, alpha, beta, depth - 1)
             new_val = min(new_val, child.get_val())
             beta = min(beta, new_val)
             if alpha >= beta:
                 break
 
     node.set_val(new_val)
-
-    return nodes_visited, nodes_created
