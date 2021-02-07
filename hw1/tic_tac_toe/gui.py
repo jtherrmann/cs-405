@@ -221,8 +221,8 @@ def new_game_command():
     window.geometry('300x150')
     window.wm_title('New game')
 
-    Xmover = tkinter.StringVar(window, value=Game.HUMAN)
-    Omover = tkinter.StringVar(window, value=Game.RANDOM)
+    Xmover = tkinter.StringVar(window, value=Game.ENGINE)
+    Omover = tkinter.StringVar(window, value=Game.ENGINE)
 
     Xmover_label = tkinter.Label(window, text='X player:')
     Omover_label = tkinter.Label(window, text='O player:')
