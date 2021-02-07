@@ -93,7 +93,7 @@ class Stats:
     created = 0
 
 
-def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=5):
+def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=8):
     stats.visited += 1
 
     if node.is_leaf():
