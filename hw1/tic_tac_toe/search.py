@@ -85,7 +85,7 @@ class Node:
 tree = Tree()
 
 
-def minimax(node: Node, depth=5):
+def minimax(node: Node, alpha=core.NEG_INF, beta=core.INF, depth=5):
     nodes_visited, nodes_created = 1, 0
 
     if node.is_leaf():
@@ -100,17 +100,23 @@ def minimax(node: Node, depth=5):
     if node.is_max_node():
         new_val = core.NEG_INF
         for child in node.get_children():
-            result = minimax(child, depth - 1)
+            result = minimax(child, alpha, beta, depth - 1)
             nodes_visited += result[0]
             nodes_created += result[1]
             new_val = max(new_val, child.get_val())
+            alpha = max(alpha, new_val)
+            if alpha >= beta:
+                break
     else:
         new_val = core.INF
         for child in node.get_children():
-            result = minimax(child, depth - 1)
+            result = minimax(child, alpha, beta, depth - 1)
             nodes_visited += result[0]
             nodes_created += result[1]
             new_val = min(new_val, child.get_val())
+            beta = min(beta, new_val)
+            if alpha >= beta:
+                break
 
     node.set_val(new_val)
 
