@@ -11,6 +11,10 @@ from . import core
 from .evaluate import eval_board
 
 
+# ----------------------------------------------------------------------
+# Tree
+# ----------------------------------------------------------------------
+
 class Tree:
 
     def __init__(self):
@@ -48,6 +52,10 @@ class Tree:
                 print('Replacing tree\n')
             self._root = Node(board)
 
+
+# ----------------------------------------------------------------------
+# Node
+# ----------------------------------------------------------------------
 
 class Node:
 
@@ -91,8 +99,9 @@ class Node:
         return min(best_children, key=lambda child: child.get_board())
 
 
-tree = Tree()
-
+# ----------------------------------------------------------------------
+# Minimax
+# ----------------------------------------------------------------------
 
 @dataclass
 class Stats:
@@ -124,3 +133,10 @@ def minimax(node: Node, stats: Stats, depth=5):
             new_val = min(new_val, child.get_val())
 
     node.set_val(new_val)
+
+
+# ----------------------------------------------------------------------
+# Global tree object
+# ----------------------------------------------------------------------
+
+tree = Tree()
