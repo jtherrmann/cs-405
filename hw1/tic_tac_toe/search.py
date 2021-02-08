@@ -1,3 +1,9 @@
+# Jake Herrmann
+# CS 405
+#
+# search.py
+# Minimax search tree.
+
 from dataclasses import dataclass
 from time import time
 

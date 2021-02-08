@@ -1,3 +1,9 @@
+# Jake Herrmann
+# CS 405
+#
+# gui.py
+# GUI for the tic-tac-toe game.
+
 import json
 import os
 import tkinter

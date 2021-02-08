@@ -1,3 +1,9 @@
+# Jake Herrmann
+# CS 405
+#
+# core.py
+# Core tic-tac-toe game logic.
+
 SIZE = 4
 OFFSET = SIZE * SIZE
 EMPTY_BOARD = 0

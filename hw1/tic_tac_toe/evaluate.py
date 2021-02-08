@@ -1,3 +1,9 @@
+# Jake Herrmann
+# CS 405
+#
+# evaluate.py
+# Tic-tac-toe board evaluation.
+
 from . import core
 
 
