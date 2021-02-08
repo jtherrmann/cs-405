@@ -71,10 +71,9 @@ def print_win_state(state, size):
     assert state == 0
 
 
-# TODO uncomment
 # noinspection PyUnreachableCode
-# if __debug__:
-#     print_win_states()
+if __debug__:
+    print_win_states()
 
 
 def add_move(index, board):
