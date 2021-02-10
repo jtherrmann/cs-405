@@ -30,13 +30,15 @@ class Tree:
         t2 = time()
 
         # noinspection PyUnusedLocal
-        total = round((t2 - t1) * 10 ** 3, ndigits=3)
+        total = (t2 - t1) * 10 ** 3
 
         # noinspection PyUnreachableCode
         if __debug__:
             print(f'Nodes visited: {stats.visited}')
             print(f'Nodes created: {stats.created}')
-            print(f'Search time: {total} ms\n')
+            print(f'Search time: {total:.3f} ms')
+            print(f'Rate: {(stats.visited / total):.1f} nodes visited / ms')
+            print()
 
         self._root = self._root.get_best_child()
         return self._root.get_board()
