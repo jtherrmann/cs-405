@@ -19,12 +19,11 @@ class TestMinimax(unittest.TestCase):
             self._test_minimax(board)
 
     def _test_minimax(self, board):
-        node = search.Node(board)
-        search.minimax(node, search.Stats(), depth=DEPTH)
-        self.assertEqual(search.test_minimax(board, DEPTH), node.get_val())
+        val = search.minimax(search.Node(board), search.Stats(), depth=DEPTH)
+        self.assertEqual(search.test_minimax(board, DEPTH), val)
         # noinspection PyUnreachableCode
         if __debug__:
-            print(f'Val: {node.get_val()}')
+            print(f'Val: {val}')
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ class Tree:
         stats = Stats()
 
         t1 = time()
-        minimax(self._root, stats)
+        self._root = minimax(self._root, stats, get_best_child=True)
         t2 = time()
 
         # noinspection PyUnusedLocal
@@ -40,7 +40,6 @@ class Tree:
             print(f'Rate: {(stats.visited / total):.1f} nodes visited / ms')
             print()
 
-        self._root = self._root.get_best_child()
         return self._root.get_board()
 
     def _update_root(self, board):
@@ -82,6 +81,7 @@ class Node:
         return self._val
 
     def set_val(self, val):
+        assert not self.is_leaf()
         self._val = val
 
     def get_children(self):
@@ -92,12 +92,6 @@ class Node:
             return 0
         self._children = [Node(board) for board in core.get_children(self._board)]
         return len(self._children)
-
-    def get_best_child(self):
-        for child in self._children:
-            if child.get_val() == self._val:
-                return child
-        assert False
 
 
 # ----------------------------------------------------------------------
@@ -110,30 +104,44 @@ class Stats:
     created = 0
 
 
-def minimax(node: Node, stats: Stats, depth=5):
+def minimax(node: Node, stats: Stats, depth=5, get_best_child=False):
     stats.visited += 1
 
     if node.is_leaf():
-        return
+        return node.get_val()
 
     if depth == 0:
-        node.set_val(eval_board(node.get_board()))
-        return
+        val = eval_board(node.get_board())
+        node.set_val(val)
+        return val
 
     stats.created += node.create_children()
 
+    best_child = None
     if node.is_max_node():
-        new_val = core.NEG_INF
+        val = core.NEG_INF
         for child in node.get_children():
-            minimax(child, stats, depth - 1)
-            new_val = max(new_val, child.get_val())
+            child_val = minimax(child, stats, depth - 1)
+            if child_val > val:
+                val = child_val
+                best_child = child
     else:
-        new_val = core.INF
+        val = core.INF
         for child in node.get_children():
-            minimax(child, stats, depth - 1)
-            new_val = min(new_val, child.get_val())
+            child_val = minimax(child, stats, depth - 1)
+            if child_val < val:
+                val = child_val
+                best_child = child
 
-    node.set_val(new_val)
+    node.set_val(val)
+
+    if get_best_child:
+        # TODO this should fail if all children were -inf (if max node) or inf (if min node)
+        assert best_child is not None
+        assert best_child.get_val() == val
+        return best_child
+
+    return val
 
 
 def test_minimax(board, depth):
