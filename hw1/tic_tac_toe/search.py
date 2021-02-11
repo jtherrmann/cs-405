@@ -66,6 +66,9 @@ class Node:
         self._val = core.check_outcome(self._board)
         self._leaf = self._val is not None
 
+        if not self._leaf:
+            self._val = eval_board(self._board)
+
         self._children = []
 
     def is_leaf(self):
@@ -80,10 +83,6 @@ class Node:
     def get_val(self):
         return self._val
 
-    def set_val(self, val):
-        assert not self.is_leaf()
-        self._val = val
-
     def get_children(self):
         return self._children
 
@@ -91,6 +90,7 @@ class Node:
         if self._children:
             return 0
         self._children = [Node(board) for board in core.get_children(self._board)]
+        self._children.sort(key=lambda child: child.get_val(), reverse=self.is_max_node())
         return len(self._children)
 
 
@@ -107,13 +107,8 @@ class Stats:
 def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=5, get_best_child=False):
     stats.visited += 1
 
-    if node.is_leaf():
+    if node.is_leaf() or depth == 0:
         return node.get_val()
-
-    if depth == 0:
-        val = eval_board(node.get_board())
-        node.set_val(val)
-        return val
 
     stats.created += node.create_children()
 
@@ -139,12 +134,9 @@ def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=5
             if alpha >= beta:
                 break
 
-    node.set_val(val)
-
     if get_best_child:
         # TODO this should fail if all children were -inf (if max node) or inf (if min node)
         assert best_child is not None
-        assert best_child.get_val() == val
         return best_child
 
     return val
