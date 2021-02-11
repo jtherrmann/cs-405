@@ -137,6 +137,22 @@ def minimax(node: Node, stats: Stats, depth=5):
     node.set_val(new_val)
 
 
+def test_minimax(board, depth):
+    # Minimax with no caching or pruning, for testing purposes.
+
+    outcome = core.check_outcome(board)
+    if outcome is not None:
+        return outcome
+
+    if depth == 0:
+        return eval_board(board)
+
+    vals = [test_minimax(child, depth - 1) for child in core.get_children(board)]
+    if not core.turn_bit(board):
+        return max(core.NEG_INF, *vals)
+    return min(core.INF, *vals)
+
+
 # ----------------------------------------------------------------------
 # Global tree object
 # ----------------------------------------------------------------------
