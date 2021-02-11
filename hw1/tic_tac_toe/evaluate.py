@@ -20,10 +20,7 @@ def eval_board(board):
 # ----------------------------------------------------------------------
 
 def eval_turn(board):
-    turn = core.turn_bit(board)
-    if turn:
-        return -1
-    return 1
+    return -1 if core.turn_bit(board) else 1
 
 
 def eval_max_connected(board):
