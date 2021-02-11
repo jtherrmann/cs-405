@@ -104,7 +104,7 @@ class Stats:
     created = 0
 
 
-def minimax(node: Node, stats: Stats, depth=5, get_best_child=False):
+def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=5, get_best_child=False):
     stats.visited += 1
 
     if node.is_leaf():
@@ -121,17 +121,23 @@ def minimax(node: Node, stats: Stats, depth=5, get_best_child=False):
     if node.is_max_node():
         val = core.NEG_INF
         for child in node.get_children():
-            child_val = minimax(child, stats, depth - 1)
+            child_val = minimax(child, stats, alpha, beta, depth - 1)
             if child_val > val:
                 val = child_val
                 best_child = child
+            alpha = max(alpha, val)
+            if alpha >= beta:
+                break
     else:
         val = core.INF
         for child in node.get_children():
-            child_val = minimax(child, stats, depth - 1)
+            child_val = minimax(child, stats, alpha, beta, depth - 1)
             if child_val < val:
                 val = child_val
                 best_child = child
+            beta = min(beta, val)
+            if alpha >= beta:
+                break
 
     node.set_val(val)
 
