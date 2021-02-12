@@ -135,7 +135,9 @@ def minimax(node: Node, stats: Stats, alpha=core.NEG_INF, beta=core.INF, depth=8
                 break
 
     if get_best_child:
-        # TODO this should fail if all children were -inf (if max node) or inf (if min node)
+        # TODO I think this assertion should fail if all children are
+        #  -inf (if max node) or inf (if min node), so the solution
+        #  would be to just return any child in that case
         assert best_child is not None
         return best_child
 
