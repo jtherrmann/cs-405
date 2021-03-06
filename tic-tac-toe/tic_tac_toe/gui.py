@@ -33,12 +33,12 @@ HISTORY_DIR = 'game-history'
 class Game:
     HUMAN = 'Human'
     RANDOM = 'Random moves'
-    ENGINE = 'Engine'
+    MINIMAX = 'Minimax'
 
     move_funcs = {
         HUMAN: '_human_move_func',
         RANDOM: '_random_move_func',
-        ENGINE: '_engine_move_func'
+        MINIMAX: '_minimax_move_func'
     }
 
     def _get_move_func(self, name):
@@ -55,7 +55,7 @@ class Game:
         moves = core.legal_moves(self._current_board())
         return core.add_move(moves[randint(0, len(moves) - 1)], self._current_board())
 
-    def _engine_move_func(self):
+    def _minimax_move_func(self):
         board = self._current_board()
         if board == core.EMPTY_BOARD:
             return core.add_move(core.MID_INDEX, core.EMPTY_BOARD)
@@ -227,8 +227,8 @@ def new_game_command():
     window.geometry('300x150')
     window.wm_title('New game')
 
-    Xmover = tkinter.StringVar(window, value=Game.ENGINE)
-    Omover = tkinter.StringVar(window, value=Game.ENGINE)
+    Xmover = tkinter.StringVar(window, value=Game.MINIMAX)
+    Omover = tkinter.StringVar(window, value=Game.MINIMAX)
 
     Xmover_label = tkinter.Label(window, text='X player:')
     Omover_label = tkinter.Label(window, text='O player:')
