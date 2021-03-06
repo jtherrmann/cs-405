@@ -1,8 +1,8 @@
 # Jake Herrmann
 # CS 405
 #
-# search.py
-# Minimax search tree.
+# minimax.py
+# Minimax search with alpha-beta pruning.
 
 from dataclasses import dataclass
 from time import time

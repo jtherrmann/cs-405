@@ -11,7 +11,7 @@ import tkinter.messagebox
 from datetime import datetime, timezone
 from random import randint
 
-from . import core, search
+from . import core, minimax
 
 # ----------------------------------------------------------------------
 # Constants
@@ -59,7 +59,7 @@ class Game:
         board = self._current_board()
         if board == core.EMPTY_BOARD:
             return core.add_move(core.MID_INDEX, core.EMPTY_BOARD)
-        return search.tree.get_next_board(board)
+        return minimax.tree.get_next_board(board)
 
     def __init__(self):
         self._game_active = False
