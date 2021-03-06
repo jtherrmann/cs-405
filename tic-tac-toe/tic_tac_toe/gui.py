@@ -34,11 +34,13 @@ class Game:
     HUMAN = 'Human'
     RANDOM = 'Random moves'
     MINIMAX = 'Minimax'
+    MCTS = 'MCTS'
 
     move_funcs = {
         HUMAN: '_human_move_func',
         RANDOM: '_random_move_func',
-        MINIMAX: '_minimax_move_func'
+        MINIMAX: '_minimax_move_func',
+        MCTS: '_mcts_move_func',
     }
 
     def _get_move_func(self, name):
@@ -60,6 +62,11 @@ class Game:
         if board == core.EMPTY_BOARD:
             return core.add_move(core.MID_INDEX, core.EMPTY_BOARD)
         return minimax.tree.get_next_board(board)
+
+    def _mcts_move_func(self):
+        # TODO
+        print('MCTS')
+        return self._random_move_func()
 
     def __init__(self):
         self._game_active = False
