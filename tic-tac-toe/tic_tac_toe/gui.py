@@ -11,7 +11,7 @@ import tkinter.messagebox
 from datetime import datetime, timezone
 from random import randint
 
-from . import core, minimax
+from . import core, minimax, mcts
 
 # ----------------------------------------------------------------------
 # Constants
@@ -64,9 +64,10 @@ class Game:
         return minimax.tree.get_next_board(board)
 
     def _mcts_move_func(self):
-        # TODO
-        print('MCTS')
-        return self._random_move_func()
+        board = self._current_board()
+        if board == core.EMPTY_BOARD:
+            return core.add_move(core.MID_INDEX, core.EMPTY_BOARD)
+        return mcts.tree.get_next_board(board)
 
     def __init__(self):
         self._game_active = False
