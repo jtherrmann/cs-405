@@ -34,6 +34,7 @@ class Tree:
 
         # noinspection PyUnreachableCode
         if __debug__:
+            print('Minimax')
             print(f'Nodes visited: {stats.visited}')
             print(f'Nodes created: {stats.created}')
             print(f'Search time: {total:.3f} ms')
@@ -50,7 +51,7 @@ class Tree:
                     return
             # noinspection PyUnreachableCode
             if __debug__:
-                print('Replacing tree\n')
+                print('Minimax: Replacing tree\n')
             self._root = Node(board)
 
 
