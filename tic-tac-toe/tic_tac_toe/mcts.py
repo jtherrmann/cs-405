@@ -97,8 +97,9 @@ class Node:
     def win_ratio(self):
         return self._wins / self._simulations
 
-    def is_X_node(self):
-        return not core.turn_bit(self._board)
+    def is_X_child(self):
+        # If it is O's turn to move, then this node is a child of an X node.
+        return bool(core.turn_bit(self._board))
 
     def fully_expanded(self):
         if self.has_outcome():
@@ -205,7 +206,7 @@ def backpropagate(path, outcome):
         assert outcome == 0
         X_win = O_win = 0.5
 
-    if path[0].is_X_node():
+    if path[0].is_X_child():
         curr_win, next_win = X_win, O_win
     else:
         curr_win, next_win = O_win, X_win
