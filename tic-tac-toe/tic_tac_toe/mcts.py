@@ -62,7 +62,6 @@ class Tree:
 # Node
 # ----------------------------------------------------------------------
 
-# TODO try different values (including 0)
 UCT_PARAM = sqrt(2)
 
 
@@ -131,8 +130,6 @@ class Node:
         return self._children[randint(0, len(self._children) - 1)]
 
     def get_best_child(self):
-        # TODO try other methods
-
         # https://ai.stackexchange.com/a/17713
         best_child = max(self._children, key=lambda child: child.simulations())
 
@@ -148,23 +145,18 @@ class Node:
 
 
 def print_children_stats(children, best_child):
-    # TODO print data in tabular format
-    # TODO mark the rows with max wins, max simulations, and max ratio
-
     print('MCTS children (wins / simulations):')
     for child in children:
         marker = ''
         if child is best_child:
             marker = ' (best child)'
-        print(f'{child.wins()} / {child.simulations()} = {child.win_ratio():.3f} {marker}')
+        print(f'{child.wins()} / {child.simulations()} = {child.win_ratio():.3f}{marker}')
     print()
 
 
 # ----------------------------------------------------------------------
 # MCTS
 # ----------------------------------------------------------------------
-
-# TODO: how to handle terminal nodes?
 
 @dataclass
 class Stats:
