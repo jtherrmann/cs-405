@@ -166,7 +166,7 @@ def mcts(root: Node, stats: Stats):
         path = get_child(root)
         outcome = rollout(path[-1])
         backpropagate(path, outcome)
-        stats.visited += len(path) - 1
+        stats.visited += len(path)
     return root.get_best_child()
 
 
