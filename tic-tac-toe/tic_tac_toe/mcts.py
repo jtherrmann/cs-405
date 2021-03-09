@@ -206,7 +206,7 @@ def backpropagate(path, outcome):
 
 
 def get_time():
-    return round(time())
+    return round(time(), ndigits=1)
 
 
 # ----------------------------------------------------------------------
