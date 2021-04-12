@@ -8,6 +8,7 @@
 # Chapter 5: Deep learning for computer vision.
 
 import argparse
+import json
 import os
 from datetime import datetime, timezone
 
@@ -124,6 +125,9 @@ history = model.fit(
 ).history
 
 model.save(os.path.join(RESULTS_DIR, 'model.h5'))
+
+with open(os.path.join(RESULTS_DIR, 'history.json'), 'w') as f:
+    f.write(json.dumps(history))
 
 # --------------------------------------------------------------------
 # Plots
