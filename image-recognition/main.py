@@ -7,6 +7,7 @@
 # Adapted from Deep Learning with Python,
 # Chapter 5: Deep learning for computer vision.
 
+import argparse
 import os
 from datetime import datetime, timezone
 
@@ -39,7 +40,17 @@ assert CLASSES == len(os.listdir(TRAIN_DIR)) == len(os.listdir(VAL_DIR))
 
 INPUT_SIZE = 150
 BATCH_SIZE = 32
-EPOCHS = 2  # TODO cli option
+
+# --------------------------------------------------------------------
+# CLI
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument('num_epochs', type=int)
+
+args = parser.parse_args()
+
+num_epochs = args.num_epochs
 
 # --------------------------------------------------------------------
 # Model
@@ -92,7 +103,7 @@ val_generator = val_datagen.flow_from_directory(
 
 history = model.fit(
     train_generator,
-    epochs=EPOCHS,
+    epochs=num_epochs,
     validation_data=val_generator
 ).history
 
@@ -101,7 +112,7 @@ model.save(os.path.join(RESULTS_DIR, 'model.h5'))
 # --------------------------------------------------------------------
 # Plots
 
-epochs = range(1, EPOCHS + 1)
+epochs = range(1, num_epochs + 1)
 
 plt.plot(epochs, history['acc'], 'bo', label='Training acc')
 plt.plot(epochs, history['val_acc'], 'b', label='Validation acc')
