@@ -15,8 +15,6 @@ from keras import layers, models, optimizers
 from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
-# TODO: add cli option for data augmentation
-
 # --------------------------------------------------------------------
 # Constants
 
