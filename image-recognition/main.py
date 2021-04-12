@@ -47,10 +47,12 @@ BATCH_SIZE = 32
 parser = argparse.ArgumentParser()
 
 parser.add_argument('num_epochs', type=int)
+parser.add_argument('--fight-overfitting', action='store_true')
 
 args = parser.parse_args()
 
 num_epochs = args.num_epochs
+fight_overfit = args.fight_overfitting
 
 # --------------------------------------------------------------------
 # Model
@@ -73,6 +75,10 @@ model.add(layers.MaxPooling2D((2, 2)))
 # single-label classification (see Deep Learning with Python, Table 4.1).
 
 model.add(layers.Flatten())
+
+if fight_overfit:
+    model.add(layers.Dropout(0.5))
+
 model.add(layers.Dense(512, activation='relu'))
 model.add(layers.Dense(CLASSES, activation='softmax'))
 
@@ -84,7 +90,19 @@ model.compile(loss='categorical_crossentropy', optimizer=optimizers.RMSprop(lr=1
 # --------------------------------------------------------------------
 # Training
 
-train_datagen = ImageDataGenerator(rescale=1./255)
+if fight_overfit:
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        rotation_range=40,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+    )
+else:
+    train_datagen = ImageDataGenerator(rescale=1./255)
+
 val_datagen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_datagen.flow_from_directory(
